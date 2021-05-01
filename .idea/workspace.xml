@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="d191c17a-aedc-4c77-8ee0-f8b045398c70" name="Default Changelist" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Go File" />
+      </list>
+    </option>
+  </component>
+  <component name="GOROOT" path="/usr/local/Cellar/go/1.16.2/libexec" />
+  <component name="ProjectId" id="1p6ve0B9JLMFPzAG770kkII1bDZ" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="DatabaseDriversLRU" value="sqlite" />
+    <property name="DefaultGoTemplateProperty" value="Go File" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="configurable.Global.GOPATH.is.expanded" value="true" />
+    <property name="configurable.Module.GOPATH.is.expanded" value="false" />
+    <property name="configurable.Project.GOPATH.is.expanded" value="true" />
+    <property name="go.import.settings.migrated" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="settings.editor.selected.configurable" value="go.sdk" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/ormdto" />
+      <recent name="$PROJECT_DIR$/clients" />
+      <recent name="$PROJECT_DIR$/query" />
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/clients/sqlite" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/query" />
+      <recent name="$PROJECT_DIR$/clients" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Go Test.TestSQLiteClient_SelectToSql in github.com/sharovik/orm/clients">
+    <configuration name="TestSQLiteClient_Execute in github.com/sharovik/orm/clients" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="orm" />
+      <working_directory value="$PROJECT_DIR$/clients" />
+      <framework value="gotest" />
+      <kind value="PACKAGE" />
+      <package value="github.com/sharovik/orm/clients" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <pattern value="^\QTestSQLiteClient_Execute\E$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="TestSQLiteClient_InsertToSql in github.com/sharovik/orm/clients" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="orm" />
+      <working_directory value="$PROJECT_DIR$/clients" />
+      <framework value="gotest" />
+      <kind value="PACKAGE" />
+      <package value="github.com/sharovik/orm/clients" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <pattern value="^\QTestSQLiteClient_InsertToSql\E$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="TestSQLiteClient_SelectToSql in github.com/sharovik/orm/clients" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="orm" />
+      <working_directory value="$PROJECT_DIR$/clients" />
+      <framework value="gotest" />
+      <kind value="PACKAGE" />
+      <package value="github.com/sharovik/orm/clients" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <pattern value="^\QTestSQLiteClient_SelectToSql\E$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="go test github.com/sharovik/orm/clients" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="orm" />
+      <working_directory value="$PROJECT_DIR$/clients" />
+      <framework value="gotest" />
+      <kind value="PACKAGE" />
+      <package value="github.com/sharovik/orm/clients" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="gobench github.com/sharovik/orm/clients" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="orm" />
+      <working_directory value="$PROJECT_DIR$/clients" />
+      <framework value="gobench" />
+      <kind value="PACKAGE" />
+      <package value="github.com/sharovik/orm/clients" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Go Test.TestSQLiteClient_SelectToSql in github.com/sharovik/orm/clients" />
+        <item itemvalue="Go Test.go test github.com/sharovik/orm/clients" />
+        <item itemvalue="Go Test.TestSQLiteClient_Execute in github.com/sharovik/orm/clients" />
+        <item itemvalue="Go Test.gobench github.com/sharovik/orm/clients" />
+        <item itemvalue="Go Test.TestSQLiteClient_InsertToSql in github.com/sharovik/orm/clients" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="d191c17a-aedc-4c77-8ee0-f8b045398c70" name="Default Changelist" comment="" />
+      <created>1614516446099</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1614516446099</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VgoProject">
+    <integration-enabled>true</integration-enabled>
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="320" y="101" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1617449681373">
+      <screen x="0" y="23" width="1440" height="828" />
+    </state>
+    <state x="320" y="101" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.23.1440.828@0.23.1440.828" timestamp="1617449681373" />
+    <state x="100" y="123" width="1240" height="625" key="#com.intellij.execution.junit2.states.ComparisonFailureState$DiffDialog" timestamp="1617608946635">
+      <screen x="0" y="23" width="1440" height="828" />
+    </state>
+    <state x="100" y="123" width="1240" height="625" key="#com.intellij.execution.junit2.states.ComparisonFailureState$DiffDialog/0.23.1440.828@0.23.1440.828" timestamp="1617608946635" />
+    <state x="534" y="36" key="#xdebugger.evaluate" timestamp="1619336572763">
+      <screen x="0" y="23" width="1440" height="823" />
+    </state>
+    <state x="534" y="36" key="#xdebugger.evaluate/0.23.1440.823@0.23.1440.823" timestamp="1619336572763" />
+    <state x="483" y="150" key="#xdebugger.evaluate/0.23.1440.828@0.23.1440.828" timestamp="1617631150259" />
+    <state width="975" height="464" key="DebuggerActiveHint" timestamp="1619335090957">
+      <screen x="0" y="23" width="1440" height="823" />
+    </state>
+    <state width="975" height="464" key="DebuggerActiveHint/0.23.1440.823@0.23.1440.823" timestamp="1619335090957" />
+    <state width="975" height="466" key="DebuggerActiveHint/0.23.1440.828@0.23.1440.828" timestamp="1617620522913" />
+    <state x="100" y="123" width="1240" height="625" key="DiffContextDialog" timestamp="1614672002357">
+      <screen x="0" y="23" width="1440" height="825" />
+    </state>
+    <state x="100" y="123" width="1240" height="625" key="DiffContextDialog/0.23.1440.825@0.23.1440.825" timestamp="1614672002357" />
+    <state width="1398" height="264" key="GridCell.Tab.0.bottom" timestamp="1619364325853">
+      <screen x="0" y="23" width="1440" height="823" />
+    </state>
+    <state width="1398" height="264" key="GridCell.Tab.0.bottom/0.23.1440.823@0.23.1440.823" timestamp="1619364325853" />
+    <state width="1398" height="265" key="GridCell.Tab.0.bottom/0.23.1440.828@0.23.1440.828" timestamp="1617865992841" />
+    <state width="1398" height="264" key="GridCell.Tab.0.center" timestamp="1619364325852">
+      <screen x="0" y="23" width="1440" height="823" />
+    </state>
+    <state width="1398" height="264" key="GridCell.Tab.0.center/0.23.1440.823@0.23.1440.823" timestamp="1619364325852" />
+    <state width="1398" height="265" key="GridCell.Tab.0.center/0.23.1440.828@0.23.1440.828" timestamp="1617865992840" />
+    <state width="1398" height="264" key="GridCell.Tab.0.left" timestamp="1619364325852">
+      <screen x="0" y="23" width="1440" height="823" />
+    </state>
+    <state width="1398" height="264" key="GridCell.Tab.0.left/0.23.1440.823@0.23.1440.823" timestamp="1619364325852" />
+    <state width="1398" height="265" key="GridCell.Tab.0.left/0.23.1440.828@0.23.1440.828" timestamp="1617865992840" />
+    <state width="1398" height="264" key="GridCell.Tab.0.right" timestamp="1619364325853">
+      <screen x="0" y="23" width="1440" height="823" />
+    </state>
+    <state width="1398" height="264" key="GridCell.Tab.0.right/0.23.1440.823@0.23.1440.823" timestamp="1619364325853" />
+    <state width="1398" height="265" key="GridCell.Tab.0.right/0.23.1440.828@0.23.1440.828" timestamp="1617865992841" />
+    <state width="1398" height="264" key="GridCell.Tab.1.bottom" timestamp="1619364325854">
+      <screen x="0" y="23" width="1440" height="823" />
+    </state>
+    <state width="1398" height="264" key="GridCell.Tab.1.bottom/0.23.1440.823@0.23.1440.823" timestamp="1619364325854" />
+    <state width="1398" height="265" key="GridCell.Tab.1.bottom/0.23.1440.828@0.23.1440.828" timestamp="1617865992843" />
+    <state width="1398" height="264" key="GridCell.Tab.1.center" timestamp="1619364325854">
+      <screen x="0" y="23" width="1440" height="823" />
+    </state>
+    <state width="1398" height="264" key="GridCell.Tab.1.center/0.23.1440.823@0.23.1440.823" timestamp="1619364325854" />
+    <state width="1398" height="265" key="GridCell.Tab.1.center/0.23.1440.828@0.23.1440.828" timestamp="1617865992842" />
+    <state width="1398" height="264" key="GridCell.Tab.1.left" timestamp="1619364325853">
+      <screen x="0" y="23" width="1440" height="823" />
+    </state>
+    <state width="1398" height="264" key="GridCell.Tab.1.left/0.23.1440.823@0.23.1440.823" timestamp="1619364325853" />
+    <state width="1398" height="265" key="GridCell.Tab.1.left/0.23.1440.828@0.23.1440.828" timestamp="1617865992842" />
+    <state width="1398" height="264" key="GridCell.Tab.1.right" timestamp="1619364325854">
+      <screen x="0" y="23" width="1440" height="823" />
+    </state>
+    <state width="1398" height="264" key="GridCell.Tab.1.right/0.23.1440.823@0.23.1440.823" timestamp="1619364325854" />
+    <state width="1398" height="265" key="GridCell.Tab.1.right/0.23.1440.828@0.23.1440.828" timestamp="1617865992842" />
+    <state width="233" height="457" key="HiddenNamespacesPopup" timestamp="1617449973944">
+      <screen x="0" y="23" width="1440" height="828" />
+    </state>
+    <state width="233" height="457" key="HiddenNamespacesPopup/0.23.1440.828@0.23.1440.828" timestamp="1617449973944" />
+    <state x="229" y="74" key="SettingsEditor" timestamp="1616842926606">
+      <screen x="0" y="23" width="1440" height="828" />
+    </state>
+    <state x="229" y="74" key="SettingsEditor/0.23.1440.828@0.23.1440.828" timestamp="1616842926606" />
+    <state x="450" y="173" width="615" height="522" key="StructurePopup" timestamp="1619359056844">
+      <screen x="0" y="23" width="1440" height="823" />
+    </state>
+    <state x="450" y="173" width="615" height="522" key="StructurePopup/0.23.1440.823@0.23.1440.823" timestamp="1619359056844" />
+    <state x="450" y="174" width="540" height="524" key="StructurePopup/0.23.1440.827@0.23.1440.827" timestamp="1616570260803" />
+    <state x="450" y="174" width="615" height="525" key="StructurePopup/0.23.1440.828@0.23.1440.828" timestamp="1616943559813" />
+    <state x="582" y="328" width="337" height="232" key="com.intellij.database.actions.DdlActions$DeleteProvider2$1" timestamp="1618045316998">
+      <screen x="0" y="23" width="1440" height="823" />
+    </state>
+    <state x="582" y="328" width="337" height="232" key="com.intellij.database.actions.DdlActions$DeleteProvider2$1/0.23.1440.823@0.23.1440.823" timestamp="1618045316998" />
+    <state x="582" y="330" width="337" height="232" key="com.intellij.database.actions.DdlActions$DeleteProvider2$1/0.23.1440.828@0.23.1440.828" timestamp="1617450474076" />
+    <state x="495" y="263" width="450" height="343" key="com.intellij.database.psi.DbRenamePsiElementProcessor.DbRenameDialog" timestamp="1617463335777">
+      <screen x="0" y="23" width="1440" height="828" />
+    </state>
+    <state x="495" y="263" width="450" height="343" key="com.intellij.database.psi.DbRenamePsiElementProcessor.DbRenameDialog/0.23.1440.828@0.23.1440.828" timestamp="1617463335777" />
+    <state x="312" y="222" width="839" height="510" key="com.intellij.database.view.ui.AbstractDbRefactoringDialog" timestamp="1618045625946">
+      <screen x="0" y="23" width="1440" height="823" />
+    </state>
+    <state x="312" y="222" width="839" height="510" key="com.intellij.database.view.ui.AbstractDbRefactoringDialog/0.23.1440.823@0.23.1440.823" timestamp="1618045625946" />
+    <state x="312" y="223" width="561" height="424" key="com.intellij.database.view.ui.AbstractDbRefactoringDialog/0.23.1440.828@0.23.1440.828" timestamp="1617609356148" />
+    <state x="100" y="123" width="1240" height="625" key="com.intellij.history.integration.ui.views.DirectoryHistoryDialog" timestamp="1614672002357">
+      <screen x="0" y="23" width="1440" height="825" />
+    </state>
+    <state x="100" y="123" width="1240" height="625" key="com.intellij.history.integration.ui.views.DirectoryHistoryDialog/0.23.1440.825@0.23.1440.825" timestamp="1614672002357" />
+    <state x="100" y="123" width="1240" height="625" key="com.intellij.history.integration.ui.views.FileHistoryDialog" timestamp="1616941354734">
+      <screen x="0" y="23" width="1440" height="828" />
+    </state>
+    <state x="100" y="123" width="1240" height="625" key="com.intellij.history.integration.ui.views.FileHistoryDialog/0.23.1440.828@0.23.1440.828" timestamp="1616941354734" />
+    <state x="323" y="53" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1619360035342">
+      <screen x="0" y="23" width="1440" height="823" />
+    </state>
+    <state x="323" y="53" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/0.23.1440.823@0.23.1440.823" timestamp="1619360035342" />
+    <state x="323" y="53" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/0.23.1440.825@0.23.1440.825" timestamp="1615027493838" />
+    <state x="323" y="53" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/0.23.1440.828@0.23.1440.828" timestamp="1617463091205" />
+    <state x="421" y="191" width="598" height="492" key="find.popup" timestamp="1616926997519">
+      <screen x="0" y="23" width="1440" height="828" />
+    </state>
+    <state x="421" y="190" width="598" height="490" key="find.popup/0.23.1440.825@0.23.1440.825" timestamp="1615106887757" />
+    <state x="421" y="191" width="598" height="492" key="find.popup/0.23.1440.828@0.23.1440.828" timestamp="1616926997519" />
+    <state x="385" y="172" width="670" height="673" key="search.everywhere.popup" timestamp="1619867108869">
+      <screen x="0" y="23" width="1440" height="824" />
+    </state>
+    <state x="385" y="172" width="670" height="672" key="search.everywhere.popup/0.23.1440.823@0.23.1440.823" timestamp="1619330653447" />
+    <state x="385" y="172" width="670" height="673" key="search.everywhere.popup/0.23.1440.824@0.23.1440.824" timestamp="1619867108869" />
+    <state x="385" y="172" key="search.everywhere.popup/0.23.1440.825@0.23.1440.825" timestamp="1614523207606" />
+    <state x="385" y="173" width="670" height="676" key="search.everywhere.popup/0.23.1440.828@0.23.1440.828" timestamp="1617609642321" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/main.go</url>
+          <line>34</line>
+          <option name="timeStamp" value="12" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/clients/sqlite.go</url>
+          <line>438</line>
+          <option name="timeStamp" value="16" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/main.go</url>
+          <line>35</line>
+          <option name="timeStamp" value="21" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/clients/sqlite.go</url>
+          <line>484</line>
+          <option name="timeStamp" value="66" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/clients/sqlite_test.go</url>
+          <line>562</line>
+          <option name="timeStamp" value="68" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/clients/sqlite.go</url>
+          <line>412</line>
+          <option name="timeStamp" value="71" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/clients/sqlite.go</url>
+          <line>417</line>
+          <option name="timeStamp" value="72" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>
