@@ -16,3 +16,6 @@ var model = dto.BaseModel{
 //Get results
 results, err := clients.SQLiteClient{}.Execute(new(Query).Select([]interface{}{"col1", "col2"}).From(&model))
 ```
+
+### More examples
+Please see the `example_mysql.go`

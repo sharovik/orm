@@ -200,7 +200,7 @@ func (c MySQLClient) prepareCreateSQLQuery(q QueryInterface) string {
 	}
 
 	if len(q.GetIndexesToAdd()) > 0 {
-		queryStr += fmt.Sprintf(" %s", generateIndexesSQLStr(q.GetIndexesToAdd()))
+		queryStr += fmt.Sprintf(",\n%s", generateIndexesSQLStr(q.GetIndexesToAdd()))
 	}
 
 	queryStr += fmt.Sprintf(") ENGINE=%s DEFAULT CHARSET=%s COLLATE=%s;", c.Config.GetEngine(), c.Config.GetCharset(), c.Config.GetCollate())
@@ -304,8 +304,6 @@ func generateIndexSQLStr(column dto.Index) string {
 		resultStr = "UNIQUE "
 	}
 
-	resultStr += "KEY"
-
-	resultStr += fmt.Sprintf("%s (%s)", column.Name, column.Key)
+	resultStr += fmt.Sprintf("KEY %s (%s)", column.Name, column.Key)
 	return resultStr
 }
