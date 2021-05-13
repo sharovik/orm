@@ -9,5 +9,6 @@ type ModelField struct {
 	Length int64
 	IsNullable bool
 	IsPrimaryKey bool
+	IsUnsigned bool
 	AutoIncrement bool
 }

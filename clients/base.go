@@ -14,14 +14,46 @@ const (
 	InsertType = "INSERT"
 	UpdateType = "UPDATE"
 	DeleteType = "DELETE"
+
+	DefaultEngine = "InnoDB"
+	DefaultCharset = "utf8mb4"
+	DefaultCollate = "utf8mb4_0900_ai_ci"
 )
 
 //DatabaseConfig the config which will be used by the client
 type DatabaseConfig struct {
 	Host     string
+	Database string
 	Username string
 	Password string
 	Port     int64
+	Engine   string
+	Charset  string
+	Collate  string
+}
+
+func (c DatabaseConfig) GetEngine() string {
+	if c.Engine == "" {
+		return DefaultEngine
+	}
+
+	return c.Engine
+}
+
+func (c DatabaseConfig) GetCharset() string {
+	if c.Charset == "" {
+		return DefaultCharset
+	}
+
+	return c.Charset
+}
+
+func (c DatabaseConfig) GetCollate() string {
+	if c.Collate == "" {
+		return DefaultCollate
+	}
+
+	return c.Collate
 }
 
 //BaseClientInterface the main interface for the client
