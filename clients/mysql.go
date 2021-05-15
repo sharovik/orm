@@ -49,12 +49,16 @@ func (c MySQLClient) generateDSN() string {
 }
 
 func (c MySQLClient) generateHost() string {
+	if c.Config.Host == "" {
+		return ""
+	}
+
 	var host = c.Config.Host
 	if c.Config.Port != 0 {
 		host += fmt.Sprintf(":%d", c.Config.Port)
 	}
 
-	return host
+	return fmt.Sprintf("tcp(%s)", host)
 }
 
 func (c MySQLClient) Disconnect() error {
@@ -74,7 +78,7 @@ func (c MySQLClient) ToSql(q QueryInterface) string {
 	case DeleteType:
 		return prepareDeleteQuery(q)
 	case AlterType:
-		return prepareAlterQuery(q)
+		return prepareAlterSQLStr(q)
 	case UpdateType:
 		return prepareUpdateQuery(q)
 	case DropType:
@@ -306,4 +310,88 @@ func generateIndexSQLStr(column dto.Index) string {
 
 	resultStr += fmt.Sprintf("KEY %s (%s)", column.Name, column.Key)
 	return resultStr
+}
+
+//prepareAlterQuery method prepares the alter query statement
+func prepareAlterSQLStr(q QueryInterface) string {
+	var queryStr = fmt.Sprintf("ALTER TABLE %s", q.GetDestination().GetTableName())
+
+	var result []string
+	//Generate Add columns
+	if len(q.GetColumns()) > 0 {
+		for _, column := range q.GetColumns() {
+			switch v := column.(type) {
+			case dto.ModelField:
+				result = append(result, generateAlterColumnAddSQLStr(v))
+			}
+		}
+	}
+
+	//Generate columns to drop
+	if len(q.GetColumnsToDrop()) > 0 {
+		for _, column := range q.GetColumnsToDrop() {
+			switch v := column.(type) {
+			case dto.ModelField:
+				result = append(result, fmt.Sprintf("DROP %s", v.Name))
+			}
+		}
+	}
+
+	//Generate indexes to add
+	if len(q.GetIndexesToAdd()) > 0 {
+		for _, column := range q.GetIndexesToAdd() {
+			str := "ADD INDEX"
+			if column.Name != "" {
+				str += fmt.Sprintf(" %s", column.Name)
+			}
+
+			str += fmt.Sprintf(" %s", column.Key)
+			result = append(result, str)
+		}
+	}
+
+	//Generate indexes to add
+	if len(q.GetIndexesToDrop()) > 0 {
+		for _, column := range q.GetIndexesToDrop() {
+			key := column.Name
+			if key == "" {
+				key = column.Key
+			}
+
+			result = append(result, fmt.Sprintf("DROP INDEX %s", key))
+		}
+	}
+
+	//Generate foreign keys to add
+	if len(q.GetForeignKeysToAdd()) > 0 {
+		for _, column := range q.GetForeignKeysToAdd() {
+			result = append(result, fmt.Sprintf("ADD %s", generateForeignKeySQL(column)))
+		}
+	}
+
+	//Generate foreign keys to drop
+	if len(q.GetForeignKeysToDrop()) > 0 {
+		for _, column := range q.GetForeignKeysToDrop() {
+			result = append(result, fmt.Sprintf("DROP FOREIGN KEY %s", column.Name))
+		}
+	}
+
+	if len(result) > 0 {
+		queryStr += fmt.Sprintf("\n%s", strings.Join(result, ","))
+	}
+
+	return queryStr
+}
+
+func generateAlterColumnAddSQLStr(column dto.ModelField) string {
+	var result = "ADD "
+
+	result += fmt.Sprintf("%s %s", column.Name, column.Type)
+	if column.Length > 0 {
+		result += fmt.Sprintf("(%d)", column.Length)
+	}
+	result += fmt.Sprintf(" %s", toSQLValue(column.Value))
+	result += fmt.Sprintf(" DEFAULT %s", toSQLValue(column.Default))
+
+	return result
 }

@@ -265,21 +265,7 @@ func generateColumnStr(column dto.ModelField) string {
 	}
 
 	if column.Default != nil {
-		resultStr += " DEFAULT"
-		switch v := column.Default.(type) {
-		case int:
-			resultStr += fmt.Sprintf(" %d", v)
-			break
-		case int64:
-			resultStr += fmt.Sprintf(" %d", v)
-			break
-		case string:
-			resultStr += fmt.Sprintf(` "%s"`, v)
-			break
-		case bool:
-			resultStr += fmt.Sprintf(" %t", v)
-			break
-		}
+		resultStr += fmt.Sprintf(" DEFAULT %s", toSQLValue(column.Default))
 	}
 
 	if column.IsNullable {
@@ -373,4 +359,28 @@ func getColumnTypeByValue(value interface{}) string {
 	}
 
 	return "VARCHAR"
+}
+
+func toSQLValue(value interface{}) string {
+	var resultStr string
+	if value == nil {
+		return "NULL"
+	}
+
+	switch v := value.(type) {
+	case int:
+		resultStr += fmt.Sprintf("%d", v)
+		break
+	case int64:
+		resultStr += fmt.Sprintf("%d", v)
+		break
+	case string:
+		resultStr += fmt.Sprintf(`"%s"`, v)
+		break
+	case bool:
+		resultStr += fmt.Sprintf("%t", v)
+		break
+	}
+
+	return resultStr
 }

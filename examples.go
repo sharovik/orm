@@ -9,7 +9,7 @@ import (
 
 func main() {
 	client, err := clients.MySQLClient{}.Connect(clients.DatabaseConfig{
-		Host:     "",
+		Host:     "localhost",
 		Username: "root",
 		Password: "secret",
 		Database: "test",
@@ -64,6 +64,7 @@ func main() {
 		AutoIncrement: false,
 	})
 
+	//Let's create a table for that model
 	q := new(clients.Query).Create(model).
 		AddForeignKey(dto.ForeignKey{
 		Name: "another_key",
@@ -104,6 +105,39 @@ func main() {
 	fmt.Println(res)
 
 	q = new(clients.Query).Select(model.GetColumns()).From(model)
+	res, err = client.Execute(q)
+	fmt.Println(err)
+	fmt.Println(res)
+
+	model.SetField("test_field2", "test test test")
+	q = new(clients.Query).Update(model)
+	res, err = client.Execute(q)
+	fmt.Println(err)
+	fmt.Println(res)
+
+	q = new(clients.Query).Alter(model).
+		AddColumn(dto.ModelField{
+		Name:          "new_column",
+		Type:          dto.VarcharColumnType,
+		Value:         nil,
+		Default:       "",
+		Length:        244,
+		IsNullable:    true,
+		IsPrimaryKey:  false,
+		IsUnsigned:    false,
+		AutoIncrement: false,
+	}).DropColumn(dto.ModelField{
+		Name:          "test_field",
+	}).DropForeignKey(dto.ForeignKey{
+		Name:     "another_key",
+	}).DropIndex(dto.Index{
+		Name:     "some_test_unique_index",
+	})
+	res, err = client.Execute(q)
+	fmt.Println(err)
+	fmt.Println(res)
+
+	q = new(clients.Query).Drop(model)
 	res, err = client.Execute(q)
 	fmt.Println(err)
 	fmt.Println(res)
