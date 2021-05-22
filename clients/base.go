@@ -2,6 +2,7 @@ package clients
 
 import (
 	"database/sql"
+	"errors"
 	"github.com/sharovik/orm/dto"
 	"github.com/sharovik/orm/query"
 )
@@ -14,6 +15,10 @@ const (
 	InsertType = "INSERT"
 	UpdateType = "UPDATE"
 	DeleteType = "DELETE"
+
+	DatabaseTypeMySQL = "mysql"
+	DatabaseTypeSqlite = "sqlite"
+	DefaultDatabaseType = DatabaseTypeSqlite
 
 	DefaultEngine = "InnoDB"
 	DefaultCharset = "utf8mb4"
@@ -30,6 +35,16 @@ type DatabaseConfig struct {
 	Engine   string
 	Charset  string
 	Collate  string
+	Type string
+}
+
+func (c DatabaseConfig) GetType() string {
+	var result = DefaultDatabaseType
+	if c.Type != "" {
+		result = c.Type
+	}
+
+	return result
 }
 
 func (c DatabaseConfig) GetEngine() string {
@@ -58,7 +73,7 @@ func (c DatabaseConfig) GetCollate() string {
 
 //BaseClientInterface the main interface for the client
 type BaseClientInterface interface {
-	Connect(DatabaseConfig) (client SQLiteClient, err error)
+	Connect(config DatabaseConfig) (client BaseClientInterface, err error)
 	Disconnect() error
 	GetClient() *sql.DB
 	ToSql(query QueryInterface) string
@@ -93,7 +108,7 @@ type QueryInterface interface {
 	Alter(dto.ModelInterface) QueryInterface
 
 	//Delete method deletes the row.
-	Delete(dto.ModelInterface) QueryInterface
+	Delete() QueryInterface
 
 	//Returns the type of the Query. Eg: INSERT, ALTER, SELECT, DELETE, CREATE, UPDATE, DROP
 	GetQueryType() string
@@ -414,8 +429,19 @@ func (q *Query) Alter(model dto.ModelInterface) QueryInterface {
 }
 
 //Delete method deletes the row.
-func (q *Query) Delete(model dto.ModelInterface) QueryInterface {
+func (q *Query) Delete() QueryInterface {
 	q.queryType = DeleteType
-	q.From(model)
 	return q
+}
+
+//InitClient method can be used for the database client init
+func InitClient(config DatabaseConfig) (BaseClientInterface, error) {
+	switch config.GetType() {
+	case DatabaseTypeSqlite:
+		return SQLiteClient{}.Connect(config)
+	case DatabaseTypeMySQL:
+		return MySQLClient{}.Connect(config)
+	}
+
+	return nil, errors.New("Failed to init the database client. ")
 }

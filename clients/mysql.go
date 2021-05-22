@@ -15,7 +15,7 @@ type MySQLClient struct {
 	Config DatabaseConfig
 }
 
-func (c MySQLClient) Connect(config DatabaseConfig) (client MySQLClient, err error) {
+func (c MySQLClient) Connect(config DatabaseConfig) (client BaseClientInterface, err error) {
 	c.Config = config
 	c.Client, err = sql.Open("mysql", c.generateDSN())
 	if err != nil {

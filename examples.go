@@ -8,13 +8,17 @@ import (
 )
 
 func main() {
-	client, err := clients.MySQLClient{}.Connect(clients.DatabaseConfig{
+	//We create database configuration for MySQL database
+	configuration := clients.DatabaseConfig{
 		Host:     "localhost",
 		Username: "root",
 		Password: "secret",
 		Database: "test",
+		Type:     clients.DatabaseTypeMySQL,
 		Port:     0,
-	})
+	}
+
+	client, err := clients.InitClient(configuration)
 	if err != nil {
 		fmt.Println(fmt.Sprintf("Failed to connect to the database. Reason: %s", err))
 		return
@@ -67,18 +71,18 @@ func main() {
 	//Let's create a table for that model
 	q := new(clients.Query).Create(model).
 		AddForeignKey(dto.ForeignKey{
-		Name: "another_key",
-		Target: query.Reference{
-			Table: "another",
-			Key:   "id",
-		},
-		With: query.Reference{
-			Table: model.TableName,
-			Key:   "another_id",
-		},
-		OnDelete: dto.CascadeAction,
-		OnUpdate: dto.NoActionAction,
-	}).AddIndex(dto.Index{
+			Name: "another_key",
+			Target: query.Reference{
+				Table: "another",
+				Key:   "id",
+			},
+			With: query.Reference{
+				Table: model.TableName,
+				Key:   "another_id",
+			},
+			OnDelete: dto.CascadeAction,
+			OnUpdate: dto.NoActionAction,
+		}).AddIndex(dto.Index{
 		Name:   "some_test_non_unique_index",
 		Target: model.TableName,
 		Key:    "test_field2",
@@ -95,6 +99,23 @@ func main() {
 
 	var columns = []interface{}{"id", "another_id"}
 	q = new(clients.Query).Select(columns).From(model)
+	res, err = client.Execute(q)
+	fmt.Println(err)
+	fmt.Println(res)
+
+	q = new(clients.Query).
+		Select(columns).
+		From(model).
+		Join(query.Join{
+			Target:    query.Reference{Table: "another", Key: "id"},
+			With:      query.Reference{Table: model.TableName, Key: "another_id"},
+			Condition: "=",
+			Type:      query.LeftJoinType,
+		}).Where(query.Where{
+		First:    "another.id",
+		Operator: "is",
+		Second:   "NULL",
+	})
 	res, err = client.Execute(q)
 	fmt.Println(err)
 	fmt.Println(res)
@@ -117,22 +138,33 @@ func main() {
 
 	q = new(clients.Query).Alter(model).
 		AddColumn(dto.ModelField{
-		Name:          "new_column",
-		Type:          dto.VarcharColumnType,
-		Value:         nil,
-		Default:       "",
-		Length:        244,
-		IsNullable:    true,
-		IsPrimaryKey:  false,
-		IsUnsigned:    false,
-		AutoIncrement: false,
-	}).DropColumn(dto.ModelField{
-		Name:          "test_field",
+			Name:          "new_column",
+			Type:          dto.VarcharColumnType,
+			Value:         nil,
+			Default:       "",
+			Length:        244,
+			IsNullable:    true,
+			IsPrimaryKey:  false,
+			IsUnsigned:    false,
+			AutoIncrement: false,
+		}).DropColumn(dto.ModelField{
+		Name: "test_field",
 	}).DropForeignKey(dto.ForeignKey{
-		Name:     "another_key",
+		Name: "another_key",
 	}).DropIndex(dto.Index{
-		Name:     "some_test_unique_index",
+		Name: "some_test_unique_index",
 	})
+	res, err = client.Execute(q)
+	fmt.Println(err)
+	fmt.Println(res)
+
+	q = new(clients.Query).Delete().
+		From(model).
+		Where(query.Where{
+			First:    "id",
+			Operator: "=",
+			Second:   "1",
+		})
 	res, err = client.Execute(q)
 	fmt.Println(err)
 	fmt.Println(res)

@@ -404,15 +404,12 @@ func TestSQLiteClient_DeleteToSql(t *testing.T) {
 		testCases = [...]expectation{
 			{
 				Expected: "DELETE FROM test_table_name",
-				Original: SQLiteClient{}.ToSql(new(Query).Delete(&model)),
-			},
-			{
-				Expected: "DELETE FROM test_table_name",
-				Original: SQLiteClient{}.ToSql(new(Query).Delete(&model).From(&model)),
+				Original: SQLiteClient{}.ToSql(new(Query).Delete().From(&model)),
 			},
 			{
 				Expected: "DELETE FROM test_table_name LEFT JOIN test_table_name2 ON (test_table_name2.id = test_table_name.relation_id)",
-				Original: SQLiteClient{}.ToSql(new(Query).Delete(&model).
+				Original: SQLiteClient{}.ToSql(new(Query).Delete().
+					From(&model).
 					Join(query.Join{
 						Target: query.Reference{
 							Table: model2.GetTableName(),
@@ -429,17 +426,22 @@ func TestSQLiteClient_DeleteToSql(t *testing.T) {
 			{
 				Expected: "DELETE FROM test_table_name ORDER BY id DESC",
 				Original: SQLiteClient{}.ToSql(new(Query).
-					Delete(&model).
+					Delete().
+					From(&model).
 					OrderBy(model.GetPrimaryKey().Name, query.OrderDirectionDesc)),
 			},
 			{
 				Expected: "DELETE FROM test_table_name GROUP BY test_table_name.id",
-				Original: SQLiteClient{}.ToSql(new(Query).Delete(&model).
+				Original: SQLiteClient{}.ToSql(new(Query).
+					Delete().
+					From(&model).
 					GroupBy("test_table_name.id")),
 			},
 			{
 				Expected: "DELETE FROM test_table_name WHERE test_table_name.relation_id = 2",
-				Original: SQLiteClient{}.ToSql(new(Query).Delete(&model).
+				Original: SQLiteClient{}.ToSql(new(Query).
+					Delete().
+					From(&model).
 					Where(query.Where{
 						First:    "test_table_name.relation_id",
 						Operator: "=",
@@ -448,7 +450,9 @@ func TestSQLiteClient_DeleteToSql(t *testing.T) {
 			},
 			{
 				Expected: `DELETE FROM test_table_name LIMIT 11`,
-				Original: SQLiteClient{}.ToSql(new(Query).Delete(&model).
+				Original: SQLiteClient{}.ToSql(new(Query).
+					Delete().
+					From(&model).
 					Limit(query.Limit{
 						From: 0,
 						To:   11,
@@ -553,7 +557,7 @@ func TestSQLiteClient_Execute(t *testing.T) {
 	assert.Equal(t, expected, res.Items()[0].GetColumns())
 
 	//Now we delete that row
-	res, err = sqliteClient.Execute(new(Query).Delete(&model))
+	res, err = sqliteClient.Execute(new(Query).Delete().From(&model))
 	assert.NoError(t, err)
 	assert.NoError(t, res.Error())
 	assert.Equal(t, int64(1), res.LastInsertID())
