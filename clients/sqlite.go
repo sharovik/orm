@@ -14,7 +14,7 @@ type SQLiteClient struct {
 	Config DatabaseConfig
 }
 
-func (c SQLiteClient) Connect(config DatabaseConfig) (client SQLiteClient, err error) {
+func (c SQLiteClient) Connect(config DatabaseConfig) (client BaseClientInterface, err error) {
 	c.Config = config
 	_, err = os.Stat(config.Host)
 	if err != nil {
