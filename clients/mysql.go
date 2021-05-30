@@ -62,7 +62,7 @@ func (c MySQLClient) generateHost() string {
 }
 
 func (c MySQLClient) Disconnect() error {
-	return nil
+	return c.Client.Close()
 }
 
 func (c MySQLClient) GetClient() *sql.DB {

@@ -30,7 +30,7 @@ func (c SQLiteClient) Connect(config DatabaseConfig) (client BaseClientInterface
 }
 
 func (c SQLiteClient) Disconnect() error {
-	return nil
+	return c.Client.Close()
 }
 
 func (c SQLiteClient) GetClient() *sql.DB {
