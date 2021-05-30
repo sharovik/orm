@@ -172,6 +172,44 @@ var (
 					To:   11,
 				})),
 		},
+		{
+			Expected: `SELECT * FROM test_table_name WHERE test_table_name2.relation_id = 2 OR col1 = "test"`,
+			Original: SQLiteClient{}.ToSql(new(Query).Select([]interface{}{}).
+				From(&model).
+				Where(query.Where{
+					First:    "test_table_name2.relation_id",
+					Operator: "=",
+					Second:   "2",
+				}).
+				Where(query.Where{
+					First:    "col1",
+					Operator: "=",
+					Second:   `"test"`,
+					Type: query.WhereOrType,
+				})),
+		},
+		{
+			Expected: `SELECT * FROM test_table_name WHERE test_table_name2.relation_id = 2 OR col1 = "test" NOT col2 = "test"`,
+			Original: SQLiteClient{}.ToSql(new(Query).Select([]interface{}{}).
+				From(&model).
+				Where(query.Where{
+					First:    "test_table_name2.relation_id",
+					Operator: "=",
+					Second:   "2",
+				}).
+				Where(query.Where{
+					First:    "col1",
+					Operator: "=",
+					Second:   `"test"`,
+					Type: query.WhereOrType,
+				}).
+				Where(query.Where{
+					First:    "col2",
+					Operator: "=",
+					Second:   `"test"`,
+					Type: query.WhereNotType,
+				})),
+		},
 	}
 )
 
