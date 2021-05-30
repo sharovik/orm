@@ -57,14 +57,18 @@ func generateJoinsStr(joins []query.Join) string {
 }
 
 func generateWhereStr(wheres []query.Where) string {
-	var preparedWheres []string
+	var resultStr = "WHERE "
 
-	for _, where := range wheres {
-		whereStr := fmt.Sprintf("%s %s %s", where.First, where.Operator, where.Second)
-		preparedWheres = append(preparedWheres, whereStr)
+	for i, where := range wheres {
+		//If we have the type of WHERE clause specified and this is not first element, we do set the type.
+		if where.GetType() != "" && i != 0 {
+			resultStr += fmt.Sprintf("%s ", where.GetType())
+		}
+
+		resultStr += fmt.Sprintf("%s %s %s ", where.First, where.Operator, where.Second)
 	}
 
-	return fmt.Sprintf("WHERE %s", strings.Join(preparedWheres, " AND "))
+	return strings.TrimSpace(resultStr)
 }
 
 func generateSelectColumnsStr(columns []interface{}) string {

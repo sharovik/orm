@@ -97,12 +97,14 @@ func main() {
 	fmt.Println(out)
 	res, err := client.Execute(q)
 
+	//We select specific columns from the table
 	var columns = []interface{}{"id", "another_id"}
 	q = new(clients.Query).Select(columns).From(model)
 	res, err = client.Execute(q)
 	fmt.Println(err)
 	fmt.Println(res)
 
+	//We do select with join to other table
 	q = new(clients.Query).
 		Select(columns).
 		From(model).
@@ -111,31 +113,54 @@ func main() {
 			With:      query.Reference{Table: model.TableName, Key: "another_id"},
 			Condition: "=",
 			Type:      query.LeftJoinType,
-		}).Where(query.Where{
-		First:    "another.id",
-		Operator: "is",
-		Second:   "NULL",
-	})
+		}).
+		Where(query.Where{
+			First:    "another.id",
+			Operator: "is",
+			Second:   "NULL",
+		})
 	res, err = client.Execute(q)
 	fmt.Println(err)
 	fmt.Println(res)
 
+	//We insert new item into our table
 	q = new(clients.Query).Insert(model)
 	res, err = client.Execute(q)
 	fmt.Println(err)
 	fmt.Println(res)
 
+	//We select all model columns from our table
 	q = new(clients.Query).Select(model.GetColumns()).From(model)
 	res, err = client.Execute(q)
 	fmt.Println(err)
 	fmt.Println(res)
 
+	//We do select from the table where id = 1 OR id = 2
+	q = new(clients.Query).Select(model.GetColumns()).
+		From(model).
+		Where(query.Where{
+			First:    "id",
+			Operator: "=",
+			Second:   1,
+		}).
+		Where(query.Where{
+			First:    "id",
+			Operator: "=",
+			Second:   2,
+			Type: query.WhereOrType,//For OR condition, you can use the Type attribute of Where object
+		})
+	res, err = client.Execute(q)
+	fmt.Println(err)
+	fmt.Println(res)
+
+	//We update the table
 	model.SetField("test_field2", "test test test")
 	q = new(clients.Query).Update(model)
 	res, err = client.Execute(q)
 	fmt.Println(err)
 	fmt.Println(res)
 
+	//We alter table
 	q = new(clients.Query).Alter(model).
 		AddColumn(dto.ModelField{
 			Name:          "new_column",
@@ -158,6 +183,7 @@ func main() {
 	fmt.Println(err)
 	fmt.Println(res)
 
+	//We delete item from the table
 	q = new(clients.Query).Delete().
 		From(model).
 		Where(query.Where{
@@ -169,6 +195,7 @@ func main() {
 	fmt.Println(err)
 	fmt.Println(res)
 
+	//We drop the table
 	q = new(clients.Query).Drop(model)
 	res, err = client.Execute(q)
 	fmt.Println(err)
