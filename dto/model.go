@@ -37,13 +37,45 @@ func (m BaseModel) GetColumns() []interface{} {
 	}
 
 	for _, field := range m.Fields {
+		switch v := field.(type) {
+		case ModelField:
+			if isFieldExists(columns, v) {
+				continue
+			}
+		}
 		columns = append(columns, field)
 	}
 	return columns
 }
 
+func isFieldExists(columns []interface{}, field ModelField) bool {
+	for _, column := range columns {
+		switch v := column.(type) {
+		case ModelField:
+			if v.Name == field.Name {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
 func (m *BaseModel) AddModelField(field ModelField) {
-	m.Fields = append(m.GetColumns(), field)
+	var isExistingModelField bool
+	for _, modelField := range m.GetColumns() {
+		switch v := modelField.(type) {
+		case ModelField:
+			if v.Name == field.Name {
+				v.Value = field.Value
+				isExistingModelField = true
+			}
+		}
+	}
+
+	if !isExistingModelField {
+		m.Fields = append(m.GetColumns(), field)
+	}
 }
 
 func (m BaseModel) GetField(name string) ModelField {

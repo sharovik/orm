@@ -141,13 +141,42 @@ func main() {
 		Where(query.Where{
 			First:    "id",
 			Operator: "=",
-			Second:   1,
+			Second:   "1",
 		}).
 		Where(query.Where{
 			First:    "id",
 			Operator: "=",
-			Second:   2,
-			Type: query.WhereOrType,//For OR condition, you can use the Type attribute of Where object
+			Second:   "2",
+			Type:     query.WhereOrType, //For OR condition, you can use the Type attribute of Where object
+		})
+	res, err = client.Execute(q)
+	fmt.Println(err)
+	fmt.Println(res)
+
+	//We do select with the more complex WHERE clause
+	//The output will be:
+	//SELECT id, id, id, another_id, test_field, test_field2 FROM test_table_name WHERE (id = 1 OR id = 2) OR id = 3
+	q = new(clients.Query).Select(model.GetColumns()).
+		From(model).
+		Where(query.Where{
+			First:    query.Where{
+				First:    "id",
+				Operator: "=",
+				Second:   "1",
+			},
+			Operator: "",
+			Second:   query.Where{
+				First:    "id",
+				Operator: "=",
+				Second:   "2",
+				Type:     query.WhereOrType, //For OR condition, you can use the Type attribute of Where object
+			},
+		}).
+		Where(query.Where{
+			First:    "id",
+			Operator: "=",
+			Second:   "3",
+			Type:     query.WhereOrType, //For OR condition, you can use the Type attribute of Where object
 		})
 	res, err = client.Execute(q)
 	fmt.Println(err)

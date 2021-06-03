@@ -185,7 +185,7 @@ var (
 					First:    "col1",
 					Operator: "=",
 					Second:   `"test"`,
-					Type: query.WhereOrType,
+					Type:     query.WhereOrType,
 				})),
 		},
 		{
@@ -201,13 +201,74 @@ var (
 					First:    "col1",
 					Operator: "=",
 					Second:   `"test"`,
-					Type: query.WhereOrType,
+					Type:     query.WhereOrType,
 				}).
 				Where(query.Where{
 					First:    "col2",
 					Operator: "=",
 					Second:   `"test"`,
-					Type: query.WhereNotType,
+					Type:     query.WhereNotType,
+				})),
+		},
+		{
+			Expected: `SELECT * FROM test_table_name WHERE (test_table_name2.relation_id = 2 OR col1 = "test") AND col2 = "test"`,
+			Original: SQLiteClient{}.ToSql(new(Query).Select([]interface{}{}).
+				From(&model).
+				Where(query.Where{
+					First: query.Where{
+						First:    "test_table_name2.relation_id",
+						Operator: "=",
+						Second:   "2",
+					},
+					Operator: "",
+					Second: query.Where{
+						First:    "col1",
+						Operator: "=",
+						Second:   `"test"`,
+						Type:     query.WhereOrType,
+					},
+					Type: query.WhereAndType,
+				}).
+				Where(query.Where{
+					First:    "col2",
+					Operator: "=",
+					Second:   `"test"`,
+					Type:     query.WhereAndType,
+				})),
+		},
+		{
+			Expected: `SELECT * FROM test_table_name WHERE ((test_table_name2.relation_id = 2 AND col1 = "test") OR col1 = "test") AND col2 = "test"`,
+			Original: SQLiteClient{}.ToSql(new(Query).Select([]interface{}{}).
+				From(&model).
+				Where(query.Where{
+					First: query.Where{
+						First:    query.Where{
+							First:    "test_table_name2.relation_id",
+							Operator: "=",
+							Second:   "2",
+						},
+						Operator: "",
+						Second:   query.Where{
+							First:    "col1",
+							Operator: "=",
+							Second:   `"test"`,
+							Type:     query.WhereAndType,
+						},
+					},
+					Operator: "",
+					Second: query.Where{
+						First:    "col1",
+						Operator: "=",
+						Second:   `"test"`,
+						Type:     query.WhereOrType,
+					},
+					Type: query.WhereAndType,
+				}).
+				Where(query.Where{
+					First:    "col2",
+					Operator: "=",
+					Second:   `"test"`,
+					Type:     query.WhereAndType,
 				})),
 		},
 	}
@@ -605,7 +666,7 @@ func TestSQLiteClient_Execute(t *testing.T) {
 	res, err = sqliteClient.Execute(new(Query).Select(model.GetColumns()).From(&model).Where(query.Where{
 		First:    "id",
 		Operator: "=",
-		Second:   query.Bind{
+		Second: query.Bind{
 			Field: "id",
 			Value: 1,
 		},
