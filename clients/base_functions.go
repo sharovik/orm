@@ -62,13 +62,44 @@ func generateWhereStr(wheres []query.Where) string {
 	for i, where := range wheres {
 		//If we have the type of WHERE clause specified and this is not first element, we do set the type.
 		if where.GetType() != "" && i != 0 {
-			resultStr += fmt.Sprintf("%s ", where.GetType())
+			resultStr += fmt.Sprintf(" %s ", where.GetType())
 		}
 
-		resultStr += fmt.Sprintf("%s %s %s ", where.First, where.Operator, where.Second)
+		resultStr += whereToStr(where)
 	}
 
 	return strings.TrimSpace(resultStr)
+}
+
+func whereToStr(where query.Where) string {
+	var (
+		resultStr string
+		isFirstIsWhere, isSecondIsWhere bool
+		)
+	switch w := where.First.(type) {
+	case query.Where:
+		resultStr += fmt.Sprintf("%s", whereToStr(w))
+		isFirstIsWhere = true
+		break
+	default:
+		resultStr += fmt.Sprintf("%s", where.First)
+		resultStr += fmt.Sprintf(" %s ", where.Operator)
+	}
+
+	switch w := where.Second.(type) {
+	case query.Where:
+		resultStr += fmt.Sprintf(" %s %s", w.GetType(), whereToStr(w))
+		isSecondIsWhere = true
+		break
+	default:
+		resultStr += fmt.Sprintf("%s", where.Second)
+	}
+
+	if isFirstIsWhere && isSecondIsWhere {
+		resultStr = fmt.Sprintf("(%s)", resultStr)
+	}
+
+	return resultStr
 }
 
 func generateSelectColumnsStr(columns []interface{}) string {
