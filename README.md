@@ -58,7 +58,7 @@ This how it will look in code:
 var columns = []interface{}{"id", "another_id"}
 q = new(clients.Query).
     Select(columns).
-    From(model).
+    From(&model).
     Join(query.Join{
         Target:    query.Reference{Table: "another", Key: "id"},
         With:      query.Reference{Table: model.TableName, Key: "another_id"},
@@ -79,8 +79,8 @@ SELECT id, another_id, test_field, test_field2 FROM test_table_name WHERE (id = 
 ```
 In code this will look like:
 ```go
-q = new(clients.Query).Select(model.GetColumns()).
-    From(model).
+q = new(clients.Query).Select(&model.GetColumns()).
+    From(&model).
     Where(query.Where{
         First:    query.Where{
             First:    "id",
@@ -104,5 +104,24 @@ q = new(clients.Query).Select(model.GetColumns()).
 res, err = client.Execute(q)
 ```
 
+And for sure you always can use the query **binding** for the untrusted data
+```go
+q = new(clients.Query).
+    Select(model.GetColumns()).
+    From(&model).
+    Where(query.Where{
+        First:    "name",
+        Operator: "=",
+        Second:   query.Bind{
+            Field: "name",
+            Value: "my test name",
+        },
+    })
+result, err := client.Execute(q)
+```
+This will generate the next prepared query
+```sql
+SELECT id, name WHERE name = ?
+```
 ### More examples
 Please see the [examples.go](examples.go) file. 
