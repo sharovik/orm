@@ -159,7 +159,7 @@ func (c MySQLClient) executeSelect(queryStr string, bindings []interface{}) (res
 			model.AddModelField(dto.ModelField{
 				Name:          name,
 				Type:          columnTypes[i],
-				Value:         value,
+				Value:         normalizeValue(value, columnTypes[i]),
 			})
 		}
 

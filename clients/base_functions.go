@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/sharovik/orm/dto"
 	"github.com/sharovik/orm/query"
+	"strconv"
 	"strings"
 )
 
@@ -396,6 +397,27 @@ func prepareColumnTypes(rows *sql.Rows) (result []string, err error) {
 	return result, nil
 }
 
+func normalizeValue(value interface{}, columnType string) interface{} {
+	switch v := value.(type) {
+	case []uint8:
+		switch columnType {
+		case dto.IntegerColumnType:
+			res, _ := strconv.Atoi(string(v))
+			return res
+		case dto.VarcharColumnType:
+			return string(v)
+		case dto.CharColumnType:
+			return string(v)
+		case dto.BooleanColumnType:
+			return string(v) == "1" || string(v) == "true"
+		}
+	default:
+		return v
+	}
+
+	return value
+}
+
 func normalizeColumnType(columnType string) string {
 	switch columnType  {
 	case "INT":
@@ -413,21 +435,6 @@ func normalizeColumnType(columnType string) string {
 	}
 
 	return dto.VarcharColumnType
-}
-
-func getColumnTypeByValue(value interface{}) string {
-	switch value.(type)  {
-	case int:
-		return "INTEGER"
-	case int64:
-		return "INTEGER"
-	case string:
-		return "VARCHAR"
-	case bool:
-		return "BOOLEAN"
-	}
-
-	return "VARCHAR"
 }
 
 func toSQLValue(value interface{}) string {
