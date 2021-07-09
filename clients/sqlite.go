@@ -127,7 +127,7 @@ func (c SQLiteClient) executeSelect(queryStr string, bindings []interface{}) (re
 			model.AddModelField(dto.ModelField{
 				Name:          name,
 				Type:          columnTypes[i],
-				Value:         value,
+				Value:         normalizeValue(value, columnTypes[i]),
 			})
 		}
 
