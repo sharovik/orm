@@ -24,6 +24,25 @@ func main() {
 		return
 	}
 
+	another := new(dto.BaseModel)
+	another.SetTableName("another")
+	another.SetPrimaryKey(dto.ModelField{
+		Name:          "id",
+		Type:          "integer",
+		Value:         nil,
+		Default:       nil,
+		Length:        0,
+		IsNullable:    false,
+		IsUnsigned:    true,
+		AutoIncrement: true,
+	})
+
+	//Let's create a table for that model
+	q := new(clients.Query).Create(another)
+	out := client.ToSql(q)
+	fmt.Println(out)
+	res, err := client.Execute(q)
+
 	model := new(dto.BaseModel)
 	model.SetTableName("test_table_name")
 	model.SetPrimaryKey(dto.ModelField{
@@ -69,7 +88,7 @@ func main() {
 	})
 
 	//Let's create a table for that model
-	q := new(clients.Query).Create(model).
+	q = new(clients.Query).Create(model).
 		AddForeignKey(dto.ForeignKey{
 			Name: "another_key",
 			Target: query.Reference{
@@ -93,9 +112,9 @@ func main() {
 		Key:    "test_field",
 		Unique: true,
 	})
-	out := client.ToSql(q)
+	out = client.ToSql(q)
 	fmt.Println(out)
-	res, err := client.Execute(q)
+	res, err = client.Execute(q)
 
 	//We select specific columns from the table
 	var columns = []interface{}{"id", "another_id"}

@@ -108,6 +108,12 @@ func (c SQLiteClient) executeSelect(queryStr string, bindings []interface{}) (re
 		values[i] = &f
 	}
 
+	columnTypes, err := prepareColumnTypes(rows)
+	if err != nil {
+		result.SetError(err)
+		return result, err
+	}
+
 	for rows.Next() {
 		model := new(dto.BaseModel)
 		err = rows.Scan(values...)
@@ -120,7 +126,7 @@ func (c SQLiteClient) executeSelect(queryStr string, bindings []interface{}) (re
 			value := *(values[i].(*interface{}))
 			model.AddModelField(dto.ModelField{
 				Name:          name,
-				Type:          getColumnTypeByValue(value),
+				Type:          columnTypes[i],
 				Value:         value,
 			})
 		}
