@@ -1,6 +1,7 @@
 package clients
 
 import (
+	"database/sql"
 	"fmt"
 	"github.com/sharovik/orm/dto"
 	"github.com/sharovik/orm/query"
@@ -379,6 +380,39 @@ func prepareAlterQuery(q QueryInterface) string {
 //prepareDropQuery method prepares the drop query statement
 func prepareDropQuery(q QueryInterface) string {
 	return fmt.Sprintf("DROP TABLE %s", q.GetDestination().GetTableName())
+}
+
+func prepareColumnTypes(rows *sql.Rows) (result []string, err error) {
+	columnTypes, err := rows.ColumnTypes()
+	if err != nil {
+		return nil, err
+	}
+
+	result = make([]string, len(columnTypes))
+	for i, columnType := range columnTypes {
+		result[i] = normalizeColumnType(columnType.DatabaseTypeName())
+	}
+
+	return result, nil
+}
+
+func normalizeColumnType(columnType string) string {
+	switch columnType  {
+	case "INT":
+		return dto.IntegerColumnType
+	case "INTEGER":
+		return dto.IntegerColumnType
+	case "VARCHAR":
+		return dto.VarcharColumnType
+	case "CHAR":
+		return dto.CharColumnType
+	case "BOOL":
+		return dto.BooleanColumnType
+	case "BOOLEAN":
+		return dto.BooleanColumnType
+	}
+
+	return dto.VarcharColumnType
 }
 
 func getColumnTypeByValue(value interface{}) string {

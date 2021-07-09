@@ -2,6 +2,7 @@ package dto
 
 const (
 	VarcharColumnType = "VARCHAR"
+	CharColumnType = "CHAR"
 	IntegerColumnType = "INTEGER"
 	BooleanColumnType = "BOOL"
 )
