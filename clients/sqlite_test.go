@@ -607,7 +607,7 @@ func TestSQLiteClient_Execute(t *testing.T) {
 		switch v := field.(type) {
 		case dto.ModelField:
 			if v.Name == "id" {
-				v.Value = int64(1)
+				v.Value = 1
 			}
 
 			expected = append(expected, dto.ModelField{
@@ -645,12 +645,12 @@ func TestSQLiteClient_Execute(t *testing.T) {
 		dto.ModelField{
 			Name:  "id",
 			Type:  "INTEGER",
-			Value: int64(1),
+			Value: 1,
 		},
 		dto.ModelField{
 			Name:  "relation_id",
 			Type:  "INTEGER",
-			Value: int64(2),
+			Value: 2,
 		},
 	}
 	assert.Equal(t, expected, res.Items()[0].GetColumns())
@@ -685,17 +685,17 @@ func initTestModel(table string) dto.BaseModel {
 			dto.ModelField{
 				Name:  "relation_id",
 				Type:  "INTEGER",
-				Value: int64(1),
+				Value: 1,
 			},
 			dto.ModelField{
 				Name:  "col1",
 				Type:  "INTEGER",
-				Value: int64(1),
+				Value: 2,
 			},
 			dto.ModelField{
 				Name:  "col2",
 				Type:  "INTEGER",
-				Value: int64(2),
+				Value: 2,
 			},
 			dto.ModelField{
 				Name:  "col3",
