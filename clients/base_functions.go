@@ -399,6 +399,8 @@ func prepareColumnTypes(rows *sql.Rows) (result []string, err error) {
 
 func normalizeValue(value interface{}, columnType string) interface{} {
 	switch v := value.(type) {
+	case int64:
+		return int(v)
 	case []uint8:
 		switch columnType {
 		case dto.IntegerColumnType:
