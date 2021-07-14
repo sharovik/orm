@@ -1,6 +1,10 @@
 # GoLang query builder
 Simple query builder, for SQL-like databases.
 
+## Databases supported
+- MySQL
+- SQLite
+
 ## How to use?
 ### Import the ORM package
 ```go
