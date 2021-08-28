@@ -359,20 +359,63 @@ func generateIndexStr(column dto.Index) string {
 
 //prepareAlterQuery method prepares the alter query statement
 func prepareAlterQuery(q QueryInterface) string {
-	var queryStr = fmt.Sprintf("ALTER TABLE %s", q.GetDestination().GetTableName())
+	var queryStr = ""
 
+	var result []string
 	if len(q.GetColumns()) > 0 {
-		var result []string
+		queryStr = fmt.Sprintf("ALTER TABLE %s ", q.GetDestination().GetTableName())
 		for _, column := range q.GetColumns() {
 			switch v := column.(type) {
 			case dto.ModelField:
 				result = append(result, fmt.Sprintf("ADD COLUMN %s", generateColumnStr(v)))
 			}
 		}
+	}
 
-		if len(result) > 0 {
-			queryStr += fmt.Sprintf("\n%s", strings.Join(result, ","))
+	//@todo: drop columns
+	//To properly drop columns in the sqlite, we need to create a new temp table with the all columns, except that column.
+	//Import data from the old table into the new one
+	//Rename the old one to the new name and rename the new table to the correct table name
+	//Drop the old table
+
+	//Generate indexes to add
+	if len(q.GetIndexesToAdd()) > 0 {
+		for _, column := range q.GetIndexesToAdd() {
+			str := "CREATE"
+			if column.Unique {
+				str += " UNIQUE"
+			}
+
+			str += " INDEX"
+			if column.Name != "" {
+				str += fmt.Sprintf(" %s", column.Name)
+			}
+
+			str += fmt.Sprintf(" on %s (%s)", q.GetDestination().GetTableName(), column.Key)
+			result = append(result, str)
 		}
+	}
+
+	//Generate indexes to add
+	if len(q.GetIndexesToDrop()) > 0 {
+		for _, column := range q.GetIndexesToDrop() {
+			key := column.Name
+			if key == "" {
+				key = column.Key
+			}
+
+			result = append(result, fmt.Sprintf("DROP INDEX %s", key))
+		}
+	}
+
+	//@todo: generate foreign keys to add
+	//The same scenario as for columns drop
+
+	//@todo: generate foreign keys to drop
+	//The same scenario as for columns drop
+
+	if len(result) > 0 {
+		queryStr += fmt.Sprintf("%s", strings.Join(result, ";\n"))
 	}
 
 	return queryStr

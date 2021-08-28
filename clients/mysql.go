@@ -318,7 +318,7 @@ func generateIndexSQLStr(column dto.Index) string {
 	return resultStr
 }
 
-//prepareAlterQuery method prepares the alter query statement
+//prepareAlterSQLStr method prepares the alter query statement
 func prepareAlterSQLStr(q QueryInterface) string {
 	var queryStr = fmt.Sprintf("ALTER TABLE %s", q.GetDestination().GetTableName())
 
@@ -346,12 +346,17 @@ func prepareAlterSQLStr(q QueryInterface) string {
 	//Generate indexes to add
 	if len(q.GetIndexesToAdd()) > 0 {
 		for _, column := range q.GetIndexesToAdd() {
-			str := "ADD INDEX"
+			str := "ADD"
+			if column.Unique {
+				str += " UNIQUE"
+			}
+
+			str += " INDEX"
 			if column.Name != "" {
 				str += fmt.Sprintf(" %s", column.Name)
 			}
 
-			str += fmt.Sprintf(" %s", column.Key)
+			str += fmt.Sprintf(" (%s)", column.Key)
 			result = append(result, str)
 		}
 	}
