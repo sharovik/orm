@@ -317,7 +317,7 @@ func TestSQLiteClient_AlterToSql(t *testing.T) {
 		model     = initTestModel("test_table_name")
 		testCases = [...]expectation{
 			{
-				Expected: "ALTER TABLE test_table_name\nADD COLUMN new_field integer DEFAULT 1 NOT NULL",
+				Expected: "ALTER TABLE test_table_name ADD COLUMN new_field integer DEFAULT 1 NOT NULL",
 				Original: SQLiteClient{}.ToSql(new(Query).Alter(&model).AddColumn(dto.ModelField{
 					Name:          "new_field",
 					Type:          "integer",
@@ -329,7 +329,7 @@ func TestSQLiteClient_AlterToSql(t *testing.T) {
 				})),
 			},
 			{
-				Expected: "ALTER TABLE test_table_name\nADD COLUMN new_field integer DEFAULT 1 NOT NULL",
+				Expected: "ALTER TABLE test_table_name ADD COLUMN new_field integer DEFAULT 1 NOT NULL",
 				Original: SQLiteClient{}.ToSql(new(Query).Alter(&model).AddColumn(dto.ModelField{
 					Name:          "new_field",
 					Type:          "integer",
@@ -338,6 +338,38 @@ func TestSQLiteClient_AlterToSql(t *testing.T) {
 					Length:        10,
 					IsNullable:    false,
 					AutoIncrement: false,
+				})),
+			},
+			{
+				Expected: "CREATE INDEX my_brand_new_index on test_table_name (request_id)",
+				Original: SQLiteClient{}.ToSql(new(Query).Alter(&model).AddIndex(dto.Index{
+					Name:   "my_brand_new_index",
+					Target: "test_table_name",
+					Key:    "request_id",
+					Unique: false,
+				})),
+			},
+			{
+				Expected: "CREATE UNIQUE INDEX my_brand_unique_new_index on test_table_name (request_id);\nCREATE INDEX my_brand_non_unique_new_index on test_table_name (name)",
+				Original: SQLiteClient{}.ToSql(new(Query).Alter(&model).AddIndex(dto.Index{
+					Name:   "my_brand_unique_new_index",
+					Target: "test_table_name",
+					Key:    "request_id",
+					Unique: true,
+				}).AddIndex(dto.Index{
+					Name:   "my_brand_non_unique_new_index",
+					Target: "test_table_name",
+					Key:    "name",
+				})),
+			},
+			{
+				Expected: "CREATE INDEX my_brand_non_unique_new_index on test_table_name (name);\nDROP INDEX my_brand_unique_new_index",
+				Original: SQLiteClient{}.ToSql(new(Query).Alter(&model).DropIndex(dto.Index{
+					Name:   "my_brand_unique_new_index",
+				}).AddIndex(dto.Index{
+					Name:   "my_brand_non_unique_new_index",
+					Target: "test_table_name",
+					Key:    "name",
 				})),
 			},
 		}
@@ -674,6 +706,43 @@ func TestSQLiteClient_Execute(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NoError(t, res.Error())
 	assert.Len(t, res.Items(), 0)
+
+	//And we make sure we really delete the row
+	res, err = sqliteClient.Execute(new(Query).
+		Alter(&model).
+		AddColumn(dto.ModelField{
+			Name:       "new_column",
+			Type:       dto.IntegerColumnType,
+			Default:    1,
+			Length:     10,
+			IsNullable: true,
+		}).
+		AddIndex(dto.Index{
+			Name:   "the_index_name",
+			Target: model.GetTableName(),
+			Key:    "new_column",
+			Unique: false,
+		}),
+	)
+	assert.NoError(t, err)
+	assert.NoError(t, res.Error())
+
+	res, err = sqliteClient.Execute(new(Query).Select([]interface{}{"new_column"}).From(&model))
+	assert.NoError(t, err)
+	assert.NoError(t, res.Error())
+
+	//And we make sure we really delete the row
+	res, err = sqliteClient.Execute(new(Query).
+		Alter(&model).
+		DropColumn(dto.ModelField{
+			Name:       "new_column",
+			Type:       dto.IntegerColumnType,
+			Default:    1,
+			Length:     10,
+			IsNullable: true,
+		}),
+	)
+	assert.Error(t, err)
 
 	removeDatabase()
 }

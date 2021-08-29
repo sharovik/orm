@@ -39,9 +39,11 @@ func main() {
 
 	//Let's create a table for that model
 	q := new(clients.Query).Create(another)
-	out := client.ToSql(q)
-	fmt.Println(out)
 	res, err := client.Execute(q)
+	if err != nil {
+		panic(err)
+		return
+	}
 
 	model := new(dto.BaseModel)
 	model.SetTableName("test_table_name")
@@ -112,9 +114,11 @@ func main() {
 		Key:    "test_field",
 		Unique: true,
 	})
-	out = client.ToSql(q)
-	fmt.Println(out)
 	res, err = client.Execute(q)
+	if err != nil {
+		panic(err)
+		return
+	}
 
 	//We select specific columns from the table
 	var columns = []interface{}{"id", "another_id"}
@@ -122,10 +126,14 @@ func main() {
 	res, err = client.Execute(q)
 	fmt.Println(err)
 	fmt.Println(res)
+	if err != nil {
+		panic(err)
+		return
+	}
 
 	//We do select with join to other table
 	q = new(clients.Query).
-		Select(columns).
+		Select([]interface{}{model.GetTableName() + ".id", "another_id"}).
 		From(model).
 		Join(query.Join{
 			Target:    query.Reference{Table: "another", Key: "id"},
@@ -141,18 +149,30 @@ func main() {
 	res, err = client.Execute(q)
 	fmt.Println(err)
 	fmt.Println(res)
+	if err != nil {
+		panic(err)
+		return
+	}
 
 	//We insert new item into our table
 	q = new(clients.Query).Insert(model)
 	res, err = client.Execute(q)
 	fmt.Println(err)
 	fmt.Println(res)
+	if err != nil {
+		panic(err)
+		return
+	}
 
 	//We select all model columns from our table
 	q = new(clients.Query).Select(model.GetColumns()).From(model)
 	res, err = client.Execute(q)
 	fmt.Println(err)
 	fmt.Println(res)
+	if err != nil {
+		panic(err)
+		return
+	}
 
 	//We do select from the table where id = 1 OR id = 2
 	q = new(clients.Query).Select(model.GetColumns()).
@@ -171,6 +191,10 @@ func main() {
 	res, err = client.Execute(q)
 	fmt.Println(err)
 	fmt.Println(res)
+	if err != nil {
+		panic(err)
+		return
+	}
 
 	//We do select with the more complex WHERE clause
 	//The output will be:
@@ -200,6 +224,10 @@ func main() {
 	res, err = client.Execute(q)
 	fmt.Println(err)
 	fmt.Println(res)
+	if err != nil {
+		panic(err)
+		return
+	}
 
 	//We update the table
 	model.SetField("test_field2", "test test test")
@@ -207,6 +235,10 @@ func main() {
 	res, err = client.Execute(q)
 	fmt.Println(err)
 	fmt.Println(res)
+	if err != nil {
+		panic(err)
+		return
+	}
 
 	//We alter table
 	q = new(clients.Query).Alter(model).
@@ -230,6 +262,26 @@ func main() {
 	res, err = client.Execute(q)
 	fmt.Println(err)
 	fmt.Println(res)
+	if err != nil {
+		panic(err)
+		return
+	}
+
+	//We add new indexes
+	q = new(clients.Query).Alter(model).
+		AddIndex(dto.Index{
+		Name:   "my_brand_new_index",
+		Target: model.GetTableName(),
+		Key:    "new_column",
+		Unique: false,
+	})
+	res, err = client.Execute(q)
+	fmt.Println(err)
+	fmt.Println(res)
+	if err != nil {
+		panic(err)
+		return
+	}
 
 	//We delete item from the table
 	q = new(clients.Query).Delete().
@@ -242,10 +294,18 @@ func main() {
 	res, err = client.Execute(q)
 	fmt.Println(err)
 	fmt.Println(res)
+	if err != nil {
+		panic(err)
+		return
+	}
 
 	//We drop the table
 	q = new(clients.Query).Drop(model)
 	res, err = client.Execute(q)
 	fmt.Println(err)
 	fmt.Println(res)
+	if err != nil {
+		panic(err)
+		return
+	}
 }

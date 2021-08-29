@@ -305,8 +305,8 @@ func TestMySQLClient_AlterToSql(t *testing.T) {
 		model     = initTestModel("test_table_name")
 		testCases = [...]expectation{
 			{
-				Expected: "ALTER TABLE test_table_name\nADD COLUMN new_field integer DEFAULT 1 NOT NULL",
-				Original: SQLiteClient{}.ToSql(new(Query).Alter(&model).AddColumn(dto.ModelField{
+				Expected: "ALTER TABLE test_table_name\nADD new_field integer(10) NULL DEFAULT 1",
+				Original: MySQLClient{}.ToSql(new(Query).Alter(&model).AddColumn(dto.ModelField{
 					Name:          "new_field",
 					Type:          "integer",
 					Value:         nil,
@@ -317,15 +317,30 @@ func TestMySQLClient_AlterToSql(t *testing.T) {
 				})),
 			},
 			{
-				Expected: "ALTER TABLE test_table_name\nADD COLUMN new_field integer DEFAULT 1 NOT NULL",
-				Original: SQLiteClient{}.ToSql(new(Query).Alter(&model).AddColumn(dto.ModelField{
-					Name:          "new_field",
-					Type:          "integer",
-					Value:         nil,
-					Default:       1,
-					Length:        10,
-					IsNullable:    false,
-					AutoIncrement: false,
+				Expected: "ALTER TABLE test_table_name\nADD INDEX my_brand_new_index (key_id)",
+				Original: MySQLClient{}.ToSql(new(Query).Alter(&model).AddIndex(dto.Index{
+					Name:   "my_brand_new_index",
+					Target: "test_table_name",
+					Key:    "key_id",
+					Unique: false,
+				})),
+			},
+			{
+				Expected: "ALTER TABLE test_table_name\nADD UNIQUE INDEX my_brand_unique_new_index (key_id)",
+				Original: MySQLClient{}.ToSql(new(Query).Alter(&model).AddIndex(dto.Index{
+					Name:   "my_brand_unique_new_index",
+					Target: "test_table_name",
+					Key:    "key_id",
+					Unique: true,
+				})),
+			},
+			{
+				Expected: "ALTER TABLE test_table_name\nADD UNIQUE INDEX my_brand_unique_new_index (key_id)",
+				Original: MySQLClient{}.ToSql(new(Query).Alter(&model).AddIndex(dto.Index{
+					Name:   "my_brand_unique_new_index",
+					Target: "test_table_name",
+					Key:    "key_id",
+					Unique: true,
 				})),
 			},
 		}
