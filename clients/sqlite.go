@@ -46,7 +46,9 @@ func (SQLiteClient) ToSql(q QueryInterface) string {
 	case DeleteType:
 		return prepareDeleteQuery(q)
 	case AlterType:
-		return prepareAlterQuery(q)
+		return prepareAlterSQLiteQuery(q)
+	case RenameType:
+		return prepareRenameTableQuery(q)
 	case UpdateType:
 		return prepareUpdateQuery(q)
 	case DropType:
@@ -75,6 +77,8 @@ func (c SQLiteClient) Execute(q QueryInterface) (result dto.BaseResult, err erro
 	case CreateType:
 		return c.executeQuery(queryStr, bindings)
 	case AlterType:
+		return c.executeQuery(queryStr, bindings)
+	case RenameType:
 		return c.executeQuery(queryStr, bindings)
 	case DeleteType:
 		return c.executeQuery(queryStr, bindings)

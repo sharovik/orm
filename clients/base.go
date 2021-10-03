@@ -10,6 +10,7 @@ import (
 const (
 	CreateType = "CREATE"
 	AlterType  = "ALTER"
+	RenameType  = "RENAME"
 	DropType   = "DROP"
 	SelectType = "SELECT"
 	InsertType = "INSERT"
@@ -107,11 +108,15 @@ type QueryInterface interface {
 	//This method receives the dto.ModelInterface object and returns the updated QueryInterface object.
 	Alter(dto.ModelInterface) QueryInterface
 
+	//Rename method renames the table to a new table name
+	Rename(original string, newTableName string) QueryInterface
+
 	//Delete method deletes the row.
 	Delete() QueryInterface
 
 	//Returns the type of the Query. Eg: INSERT, ALTER, SELECT, DELETE, CREATE, UPDATE, DROP
 	GetQueryType() string
+	GetNewTableName() string
 	GetDestination() dto.ModelInterface
 	GetColumns() []interface{}
 	GetColumnsToDrop() []interface{}
@@ -124,6 +129,9 @@ type QueryInterface interface {
 	GetOrderBy() []query.OrderByColumn
 	GetGroupBy() []string
 	GetLimit() query.Limit
+
+	Values(interface{}) QueryInterface
+	GetValues() interface{}
 
 	//From using this method you can specify the ORDER BY fields with the right direction to order.
 	From(model dto.ModelInterface) QueryInterface
@@ -171,6 +179,7 @@ type Query struct {
 	destination     dto.ModelInterface
 	bindings        []query.Bind
 	queryType       string
+	newTableName    string
 	columns         []interface{}
 	columnsDrop     []interface{}
 	indexAdd        []dto.Index
@@ -181,11 +190,16 @@ type Query struct {
 	joins           []query.Join
 	orderBys        []query.OrderByColumn
 	groupBys        []string
+	values          interface{}
 	limit           query.Limit
 }
 
 func (q Query) GetQueryType() string {
 	return q.queryType
+}
+
+func (q Query) GetNewTableName() string {
+	return q.newTableName
 }
 
 func (q Query) GetDestination() dto.ModelInterface {
@@ -335,6 +349,17 @@ func (q *Query) DropIndex(field dto.Index) QueryInterface {
 	return q
 }
 
+//Values sets the values, which will be used for insert queries
+func (q *Query) Values(values interface{}) QueryInterface {
+	q.values = values
+	return q
+}
+
+//GetValues retrieves the values added by Values method
+func (q *Query) GetValues() interface{} {
+	return q.values
+}
+
 //Create method will return the query object for table creation
 func (q *Query) Create(model dto.ModelInterface) QueryInterface {
 	q.queryType = CreateType
@@ -346,6 +371,16 @@ func (q *Query) Create(model dto.ModelInterface) QueryInterface {
 func (q *Query) Drop(model dto.ModelInterface) QueryInterface {
 	q.queryType = DropType
 	q.From(model)
+	return q
+}
+
+//Rename will rename the table to the new table name
+func (q *Query) Rename(table string, newTableName string) QueryInterface {
+	q.queryType = RenameType
+	q.From(&dto.BaseModel{
+		TableName:  table,
+	})
+	q.newTableName = newTableName
 	return q
 }
 

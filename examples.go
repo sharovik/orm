@@ -308,4 +308,36 @@ func main() {
 		panic(err)
 		return
 	}
+
+	//We rename the another table
+	q = new(clients.Query).Rename(another.GetTableName(), "new_another_table")
+	res, err = client.Execute(q)
+	fmt.Println(err)
+	fmt.Println(res)
+	if err != nil {
+		panic(err)
+		return
+	}
+
+	q = new(clients.Query).Select([]interface{}{}).From(&dto.BaseModel{
+		TableName:  "new_another_table",
+	})
+	res, err = client.Execute(q)
+	fmt.Println(err)
+	fmt.Println(res)
+	if err != nil {
+		panic(err)
+		return
+	}
+
+	//We drop the table
+	another.SetTableName("new_another_table")
+	q = new(clients.Query).Drop(another)
+	res, err = client.Execute(q)
+	fmt.Println(err)
+	fmt.Println(res)
+	if err != nil {
+		panic(err)
+		return
+	}
 }

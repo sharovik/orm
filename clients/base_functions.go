@@ -9,6 +9,9 @@ import (
 	"strings"
 )
 
+const TempTablePrefix = "temp_"
+const OldTablePrefix = "old_"
+
 //prepareSelectQuery method prepares the select query statement
 func prepareSelectQuery(q QueryInterface) string {
 	var queryStr = "SELECT "
@@ -182,7 +185,14 @@ func prepareInsertQuery(q QueryInterface) string {
 
 	queryStr += fmt.Sprintf(" (%s)", strings.Join(schema, ", "))
 
-	queryStr += fmt.Sprintf(" VALUES (%s)", generateBindingsStr(q.GetBindings()))
+	switch v := q.GetValues().(type) {
+	case QueryInterface:
+		queryStr += fmt.Sprintf(" %s", prepareSelectQuery(v))
+		break
+	default:
+		queryStr += fmt.Sprintf(" VALUES (%s)", generateBindingsStr(q.GetBindings()))
+		break
+	}
 
 	return queryStr
 }
@@ -357,9 +367,107 @@ func generateIndexStr(column dto.Index) string {
 	return resultStr
 }
 
-//prepareAlterQuery method prepares the alter query statement
-func prepareAlterQuery(q QueryInterface) string {
+func isNewSchemaShouldBeGenerated(q QueryInterface) bool {
+	if len(q.GetColumnsToDrop()) > 0 || len(q.GetForeignKeysToAdd()) > 0 || len(q.GetForeignKeysToDrop()) > 0 {
+		return true
+	}
+
+	return false
+}
+
+func buildTempTableSQLiteQuery(q QueryInterface) QueryInterface {
+	//We remove columns which we need to drop
+	var columns []interface{}
+	for _, column := range q.GetDestination().GetColumns() {
+		switch col := column.(type) {
+		case dto.ModelField:
+			if len(q.GetColumnsToDrop()) == 0 {
+				columns = append(columns, col)
+				continue
+			}
+
+			for _, columnToDrop := range q.GetColumnsToDrop() {
+				switch v := columnToDrop.(type) {
+				case dto.ModelField:
+					if col.Name == v.Name {
+						continue
+					}
+
+					columns = append(columns, col)
+				}
+			}
+		}
+	}
+
+	//Add columns
+	qb := (new(Query)).Create(&dto.BaseModel{
+		TableName:  fmt.Sprintf("%s%s", TempTablePrefix, q.GetDestination().GetTableName()),
+		PrimaryKey: q.GetDestination().GetPrimaryKey(),
+		Fields: columns,
+	})
+
+	for _, column := range q.GetColumns() {
+		switch v := column.(type) {
+		case dto.ModelField:
+			qb.AddColumn(v)
+		}
+	}
+
+	for _, column := range q.GetIndexesToAdd() {
+		qb.AddIndex(column)
+	}
+
+	for _, column := range q.GetIndexesToAdd() {
+		qb.AddIndex(column)
+	}
+
+	for _, column := range q.GetForeignKeysToAdd() {
+		qb.AddForeignKey(column)
+	}
+
+	return qb
+}
+
+//prepareAlterSQLiteQuery method prepares the alter query statement
+func prepareAlterSQLiteQuery(q QueryInterface) string {
 	var queryStr = ""
+
+	if isNewSchemaShouldBeGenerated(q) {
+		//We first generate the create statement for the new table
+		qb := buildTempTableSQLiteQuery(q)
+		queryStr = fmt.Sprintf("%s\n", prepareCreateQuery(qb))
+
+		//Then we insert the data from the old table into the new table
+		var selectColumns []interface{}
+		for _, column := range qb.GetDestination().GetColumns() {
+			switch v := column.(type) {
+			case dto.ModelField:
+				if v.AutoIncrement {
+					break
+				}
+
+				selectColumns = append(selectColumns, v.Name)
+			}
+		}
+		selQb := (new(Query)).Select(selectColumns).From(q.GetDestination())
+		inQb := (new(Query)).Insert(qb.GetDestination()).Values(selQb)
+		queryStr += fmt.Sprintf("%s;\n", prepareInsertQuery(inQb))
+
+		//Now we need to switch the names of the new and the old tables
+		queryStr += fmt.Sprintf("%s;\n", prepareRenameTableQuery(new(Query).
+			Rename(q.GetDestination().GetTableName(), fmt.Sprintf("%s%s", OldTablePrefix, q.GetDestination().GetTableName())),
+		))
+		queryStr += fmt.Sprintf("%s;\n", prepareRenameTableQuery(new(Query).
+			Rename(qb.GetDestination().GetTableName(), q.GetDestination().GetTableName()),
+		))
+
+		//We drop the old table
+		queryStr += fmt.Sprintf("%s;", prepareDropQuery(new(Query).Drop(&dto.BaseModel{
+			TableName:  fmt.Sprintf("%s%s", OldTablePrefix, q.GetDestination().GetTableName()),
+		})))
+
+		return queryStr
+	}
 
 	var result []string
 	if len(q.GetColumns()) > 0 {
@@ -371,12 +479,6 @@ func prepareAlterQuery(q QueryInterface) string {
 			}
 		}
 	}
-
-	//@todo: drop columns
-	//To properly drop columns in the sqlite, we need to create a new temp table with the all columns, except that column.
-	//Import data from the old table into the new one
-	//Rename the old one to the new name and rename the new table to the correct table name
-	//Drop the old table
 
 	//Generate indexes to add
 	if len(q.GetIndexesToAdd()) > 0 {
@@ -408,17 +510,15 @@ func prepareAlterQuery(q QueryInterface) string {
 		}
 	}
 
-	//@todo: generate foreign keys to add
-	//The same scenario as for columns drop
-
-	//@todo: generate foreign keys to drop
-	//The same scenario as for columns drop
-
 	if len(result) > 0 {
 		queryStr += fmt.Sprintf("%s", strings.Join(result, ";\n"))
 	}
 
 	return queryStr
+}
+
+func prepareRenameTableQuery(q QueryInterface) string {
+	return fmt.Sprintf("ALTER TABLE `%s` RENAME TO `%s`", q.GetDestination().GetTableName(), q.GetNewTableName())
 }
 
 //prepareDropQuery method prepares the drop query statement
