@@ -79,6 +79,8 @@ func (c MySQLClient) ToSql(q QueryInterface) string {
 		return prepareDeleteQuery(q)
 	case AlterType:
 		return prepareAlterSQLStr(q)
+	case RenameType:
+		return prepareRenameTableQuery(q)
 	case UpdateType:
 		return prepareUpdateQuery(q)
 	case DropType:
@@ -109,6 +111,8 @@ func (c MySQLClient) Execute(q QueryInterface) (result dto.BaseResult, err error
 	case AlterType:
 		return c.executeQuery(queryStr, bindings)
 	case DeleteType:
+		return c.executeQuery(queryStr, bindings)
+	case RenameType:
 		return c.executeQuery(queryStr, bindings)
 	case DropType:
 		return c.executeQuery(queryStr, bindings)
@@ -185,7 +189,7 @@ func (c MySQLClient) executeQuery(queryStr string, bindings []interface{}) (resu
 	return result, nil
 }
 
-//prepareCreateQuery method prepares the create query statement
+//prepareCreateSQLQuery method prepares the create query statement
 func (c MySQLClient) prepareCreateSQLQuery(q QueryInterface) string {
 	queryStr := fmt.Sprintf("CREATE TABLE %s (", q.GetDestination().GetTableName())
 

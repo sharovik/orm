@@ -288,6 +288,12 @@ func TestSQLiteClient_InsertToSql(t *testing.T) {
 				Expected: "INSERT INTO test_table_name (relation_id, col1, col2, col3) VALUES (?, ?, ?, ?)",
 				Original: SQLiteClient{}.ToSql(new(Query).Insert(&model)),
 			},
+			{
+				Expected: "INSERT INTO test_table_name (relation_id, col1, col2, col3) SELECT * FROM test_table_name1",
+				Original: SQLiteClient{}.ToSql(new(Query).Insert(&model).Values(new(Query).Select([]interface{}{}).From(&dto.BaseModel{
+					TableName: "test_table_name1",
+				}))),
+			},
 		}
 	)
 
@@ -303,6 +309,26 @@ func TestSQLiteClient_DropToSql(t *testing.T) {
 			{
 				Expected: "DROP TABLE test_table_name",
 				Original: SQLiteClient{}.ToSql(new(Query).Drop(&model)),
+			},
+		}
+	)
+
+	for _, testCase := range testCases {
+		assert.Equal(t, testCase.Expected, testCase.Original)
+	}
+}
+
+func TestSQLiteClient_RenameToSql(t *testing.T) {
+	var (
+		model     = initTestModel("test_table_name")
+		testCases = [...]expectation{
+			{
+				Expected: "ALTER TABLE `test_table_name` RENAME TO `new_test_table`",
+				Original: SQLiteClient{}.ToSql(new(Query).Rename(model.GetTableName(), "new_test_table")),
+			},
+			{
+				Expected: "ALTER TABLE `test_table` RENAME TO `new_test_table`",
+				Original: SQLiteClient{}.ToSql(new(Query).Rename("test_table", "new_test_table")),
 			},
 		}
 	)
@@ -371,6 +397,37 @@ func TestSQLiteClient_AlterToSql(t *testing.T) {
 					Target: "test_table_name",
 					Key:    "name",
 				})),
+			},
+			{
+				Expected: "CREATE TABLE temp_test_table_name (id INTEGER CONSTRAINT temp_test_table_name_pk primary key autoincrement, relation_id INTEGER NOT NULL, col1 INTEGER NOT NULL, col2 INTEGER NOT NULL);\nINSERT INTO temp_test_table_name (relation_id, col1, col2) SELECT relation_id, col1, col2 FROM test_table_name;\nALTER TABLE `test_table_name` RENAME TO `old_test_table_name`;\nALTER TABLE `temp_test_table_name` RENAME TO `test_table_name`;\nDROP TABLE old_test_table_name;",
+				Original: SQLiteClient{}.ToSql(new(Query).Alter(&model).
+					DropColumn(dto.ModelField{
+						Name: "col3",
+					})),
+			},
+			{
+				Expected: "CREATE TABLE temp_test_table_name (id INTEGER CONSTRAINT temp_test_table_name_pk primary key autoincrement, relation_id INTEGER NOT NULL, col1 INTEGER NOT NULL, col2 INTEGER NOT NULL, col3 VARCHAR NOT NULL);\nINSERT INTO temp_test_table_name (relation_id, col1, col2, col3) SELECT relation_id, col1, col2, col3 FROM test_table_name;\nALTER TABLE `test_table_name` RENAME TO `old_test_table_name`;\nALTER TABLE `temp_test_table_name` RENAME TO `test_table_name`;\nDROP TABLE old_test_table_name;",
+				Original: SQLiteClient{}.ToSql(new(Query).Alter(&model).
+					DropForeignKey(dto.ForeignKey{
+						Name: "test_foreign_key",
+					})),
+			},
+			{
+				Expected: "CREATE TABLE temp_test_table_name (id INTEGER CONSTRAINT temp_test_table_name_pk primary key autoincrement, relation_id INTEGER NOT NULL, col1 INTEGER NOT NULL, col2 INTEGER NOT NULL, col3 VARCHAR NOT NULL,\nCONSTRAINT fk_test\nFOREIGN KEY (relation_id)\n REFERENCES test_table_name2 (id)\nON DELETE NO ACTION\nON UPDATE NO ACTION);\nINSERT INTO temp_test_table_name (relation_id, col1, col2, col3) SELECT relation_id, col1, col2, col3 FROM test_table_name;\nALTER TABLE `test_table_name` RENAME TO `old_test_table_name`;\nALTER TABLE `temp_test_table_name` RENAME TO `test_table_name`;\nDROP TABLE old_test_table_name;",
+				Original: SQLiteClient{}.ToSql(new(Query).Alter(&model).
+					AddForeignKey(dto.ForeignKey{
+						Name: "fk_test",
+						Target: query.Reference{
+							Table: "test_table_name2",
+							Key:   "id",
+						},
+						With: query.Reference{
+							Table: "test_table_name",
+							Key:   "relation_id",
+						},
+						OnDelete: "",
+						OnUpdate: "",
+					})),
 			},
 		}
 	)
@@ -731,18 +788,70 @@ func TestSQLiteClient_Execute(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NoError(t, res.Error())
 
-	//And we make sure we really delete the row
+	//We test drop foreign keys
+	testNewTable := initTestModel("test_table")
 	res, err = sqliteClient.Execute(new(Query).
-		Alter(&model).
-		DropColumn(dto.ModelField{
-			Name:       "new_column",
-			Type:       dto.IntegerColumnType,
-			Default:    1,
-			Length:     10,
-			IsNullable: true,
+		Create(&testNewTable).
+		AddForeignKey(dto.ForeignKey{
+			Name: "fk_test",
+			Target: query.Reference{
+				Table: model.GetTableName(),
+				Key:   "id",
+			},
+			With: query.Reference{
+				Table: "test_table",
+				Key:   "col2",
+			},
+			OnDelete: "",
+			OnUpdate: "",
+		}).
+		AddForeignKey(dto.ForeignKey{
+			Name: "fk_test2",
+			Target: query.Reference{
+				Table: model.GetTableName(),
+				Key:   "id",
+			},
+			With: query.Reference{
+				Table: "test_table",
+				Key:   "col2",
+			},
+			OnDelete: "",
+			OnUpdate: "",
+		}))
+	assert.NoError(t, err)
+
+	res, err = sqliteClient.Execute(new(Query).Insert(&testNewTable))
+	assert.NoError(t, err)
+	assert.NoError(t, res.Error())
+	assert.Equal(t, int64(1), res.LastInsertID())
+	assert.Len(t, res.Items(), 0)
+
+	res, err = sqliteClient.Execute(new(Query).Insert(&testNewTable))
+	assert.NoError(t, err)
+	assert.NoError(t, res.Error())
+	assert.Equal(t, int64(2), res.LastInsertID())
+	assert.Len(t, res.Items(), 0)
+
+	res, err = sqliteClient.Execute(new(Query).
+		Alter(&testNewTable).
+		AddForeignKey(dto.ForeignKey{
+			Name: "fk_test",
+			Target: query.Reference{
+				Table: model.GetTableName(),
+				Key:   "id",
+			},
+			With: query.Reference{
+				Table: "test_table",
+				Key:   "col2",
+			},
+			OnDelete: "",
+			OnUpdate: "",
+		}).
+		DropForeignKey(dto.ForeignKey{
+			Name:       "fk_test2",
 		}),
 	)
-	assert.Error(t, err)
+	assert.NoError(t, err)
 
 	removeDatabase()
 }

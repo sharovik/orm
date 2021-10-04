@@ -7,6 +7,7 @@ type ModelInterface interface {
 	GetColumns() []interface{}
 	GetField(name string) ModelField
 	AddModelField(ModelField)
+	RemoveModelField(fieldName string)
 	GetPrimaryKey() ModelField
 	SetPrimaryKey(ModelField)
 }
@@ -118,4 +119,20 @@ func (m BaseModel) GetPrimaryKey() ModelField {
 func (m *BaseModel) SetPrimaryKey(field ModelField) {
 	field.IsPrimaryKey = true
 	m.PrimaryKey = field
+}
+
+func (m *BaseModel) RemoveModelField(field string) {
+	var columns []interface{}
+	for _, f := range m.Fields {
+		switch v := f.(type) {
+		case ModelField:
+			if field == v.Name {
+				continue
+			}
+		}
+
+		columns = append(columns, f)
+	}
+
+	m.Fields = columns
 }

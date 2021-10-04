@@ -274,7 +274,13 @@ func TestMySQLClient_InsertToSql(t *testing.T) {
 		testCases = [...]expectation{
 			{
 				Expected: "INSERT INTO test_table_name (relation_id, col1, col2, col3) VALUES (?, ?, ?, ?)",
-				Original: SQLiteClient{}.ToSql(new(Query).Insert(&model)),
+				Original: MySQLClient{}.ToSql(new(Query).Insert(&model)),
+			},
+			{
+				Expected: "INSERT INTO test_table_name (relation_id, col1, col2, col3) SELECT * FROM test_table_name1",
+				Original: MySQLClient{}.ToSql(new(Query).Insert(&model).Values(new(Query).Select([]interface{}{}).From(&dto.BaseModel{
+					TableName: "test_table_name1",
+				}))),
 			},
 		}
 	)
@@ -342,6 +348,26 @@ func TestMySQLClient_AlterToSql(t *testing.T) {
 					Key:    "key_id",
 					Unique: true,
 				})),
+			},
+		}
+	)
+
+	for _, testCase := range testCases {
+		assert.Equal(t, testCase.Expected, testCase.Original)
+	}
+}
+
+func TestMySQLClient_RenameToSql(t *testing.T) {
+	var (
+		model     = initTestModel("test_table_name")
+		testCases = [...]expectation{
+			{
+				Expected: "ALTER TABLE `test_table_name` RENAME TO `new_test_table`",
+				Original: MySQLClient{}.ToSql(new(Query).Rename(model.GetTableName(), "new_test_table")),
+			},
+			{
+				Expected: "ALTER TABLE `test_table` RENAME TO `new_test_table`",
+				Original: MySQLClient{}.ToSql(new(Query).Rename("test_table", "new_test_table")),
 			},
 		}
 	)

@@ -129,3 +129,7 @@ SELECT id, name WHERE name = ?
 ```
 ### More examples
 Please see the [examples.go](examples.go) file. 
+
+### Other notes
+- [table renaming](documentation/rename-table.md)
+- [SQLite warnings](documentation/sqlite-warnings.md)
