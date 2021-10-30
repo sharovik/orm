@@ -136,6 +136,12 @@ type QueryInterface interface {
 	//From using this method you can specify the ORDER BY fields with the right direction to order.
 	From(model dto.ModelInterface) QueryInterface
 
+	//IfNotExists Sets the IfNotExists flag. Method can be used in the combination with CREATE TABLE statement to have condition CREATE TABLE IF NOT EXISTS
+	IfNotExists() QueryInterface
+
+	//GetIfNotExists method can be used in the combination with CREATE TABLE statement to have condition CREATE TABLE IF NOT EXISTS
+	GetIfNotExists() bool
+
 	//OrderBy using this method you can specify the ORDER BY fields with the right direction to order.
 	OrderBy(field string, direction string) QueryInterface
 
@@ -182,6 +188,7 @@ type Query struct {
 	newTableName    string
 	columns         []interface{}
 	columnsDrop     []interface{}
+	ifNotExists     bool
 	indexAdd        []dto.Index
 	indexDrop       []dto.Index
 	foreignKeysAdd  []dto.ForeignKey
@@ -258,6 +265,17 @@ func (q Query) GetLimit() query.Limit {
 func (q *Query) From(model dto.ModelInterface) QueryInterface {
 	q.destination = model
 	return q
+}
+
+//IfNotExists sets the ifNotExists flag. method can be used in the combination with CREATE TABLE statement to have condition CREATE TABLE IF NOT EXISTS
+func (q *Query) IfNotExists() QueryInterface {
+	q.ifNotExists = true
+	return q
+}
+
+//GetIfNotExists method can be used in the combination with CREATE TABLE statement to have condition CREATE TABLE IF NOT EXISTS
+func (q *Query) GetIfNotExists() bool {
+	return q.ifNotExists
 }
 
 //OrderBy using this method you can specify the ORDER BY fields with the right direction to order.

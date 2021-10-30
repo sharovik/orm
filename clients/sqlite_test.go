@@ -538,6 +538,17 @@ func TestSQLiteClient_CreateToSql(t *testing.T) {
 						Unique: true,
 					})),
 			},
+			{
+				Expected: "CREATE TABLE IF NOT EXISTS test_table_name (id INTEGER CONSTRAINT test_table_name_pk primary key autoincrement, relation_id INTEGER NOT NULL, relation_id2 INTEGER NOT NULL, title VARCHAR DEFAULT \"test\" NOT NULL, description VARCHAR NULL); CREATE UNIQUE INDEX the_index_name \nON test_table_name (relation_id);",
+				Original: SQLiteClient{}.ToSql(new(Query).Create(&model).
+					IfNotExists().
+					AddIndex(dto.Index{
+						Name:   "the_index_name",
+						Target: model.GetTableName(),
+						Key:    "relation_id",
+						Unique: true,
+					})),
+			},
 		}
 	)
 

@@ -38,7 +38,7 @@ func main() {
 	})
 
 	//Let's create a table for that model
-	q := new(clients.Query).Create(another)
+	q := new(clients.Query).Create(another).IfNotExists()
 	res, err := client.Execute(q)
 	if err != nil {
 		panic(err)
@@ -321,6 +321,8 @@ func main() {
 
 	q = new(clients.Query).Select([]interface{}{}).From(&dto.BaseModel{
 		TableName:  "new_another_table",
+		PrimaryKey: dto.ModelField{},
+		Fields:     nil,
 	})
 	res, err = client.Execute(q)
 	fmt.Println(err)

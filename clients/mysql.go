@@ -191,7 +191,12 @@ func (c MySQLClient) executeQuery(queryStr string, bindings []interface{}) (resu
 
 //prepareCreateSQLQuery method prepares the create query statement
 func (c MySQLClient) prepareCreateSQLQuery(q QueryInterface) string {
-	queryStr := fmt.Sprintf("CREATE TABLE %s (", q.GetDestination().GetTableName())
+	ifNotExists := ""
+	if q.GetIfNotExists() {
+		ifNotExists = "IF NOT EXISTS "
+	}
+
+	queryStr := fmt.Sprintf("CREATE TABLE %s%s (", ifNotExists, q.GetDestination().GetTableName())
 
 	if q.GetDestination().GetPrimaryKey() != *(new(dto.ModelField)) {
 		queryStr += generateColumnSQLStr(q.GetDestination().GetPrimaryKey())
