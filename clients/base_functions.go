@@ -259,7 +259,12 @@ func prepareDeleteQuery(q QueryInterface) string {
 
 //prepareCreateQuery method prepares the create query statement
 func prepareCreateQuery(q QueryInterface) string {
-	queryStr := fmt.Sprintf("CREATE TABLE %s (", q.GetDestination().GetTableName())
+	ifNotExists := ""
+	if q.GetIfNotExists() {
+		ifNotExists = "IF NOT EXISTS "
+	}
+
+	queryStr := fmt.Sprintf("CREATE TABLE %s%s (", ifNotExists, q.GetDestination().GetTableName())
 
 	if q.GetDestination().GetPrimaryKey() != *(new(dto.ModelField)) {
 		queryStr += fmt.Sprintf("%s %s CONSTRAINT %s_pk primary key", q.GetDestination().GetPrimaryKey().Name, q.GetDestination().GetPrimaryKey().Type, q.GetDestination().GetTableName())
