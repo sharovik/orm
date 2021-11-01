@@ -348,7 +348,7 @@ func generateIndexesStr(columns []dto.Index) string {
 		result = append(result, generateIndexStr(column))
 	}
 
-	return strings.Join(result, ",\n")
+	return strings.Join(result, "\n")
 }
 
 func generateForeignKey(column dto.ForeignKey) string {

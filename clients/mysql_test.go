@@ -407,7 +407,67 @@ func TestMySQLClient_CreateToSql(t *testing.T) {
 				AutoIncrement: true,
 			},
 		}
+		otherModel = dto.BaseModel{
+			TableName:  "some_other_table",
+			PrimaryKey: dto.ModelField{},
+			Fields:     nil,
+		}
+
+		otherModel2 = dto.BaseModel{
+			TableName:  "some_other_table2",
+			PrimaryKey: dto.ModelField{},
+			Fields:     nil,
+		}
 		testCases = [...]expectation{
+			{
+				Expected: "CREATE TABLE test_table_name (id INTEGER CONSTRAINT test_table_name_pk primary key autoincrement, relation_id INTEGER NOT NULL, relation_id2 INTEGER NOT NULL, title VARCHAR DEFAULT \"test\" NOT NULL, description VARCHAR NULL,\nCONSTRAINT event_id\nFOREIGN KEY (event_id)\n REFERENCES some_other_table (id)\nON DELETE CASCADE\nON UPDATE NO ACTION,\nCONSTRAINT scenario_id\nFOREIGN KEY (scenario_id)\n REFERENCES some_other_table2 (id)\nON DELETE CASCADE\nON UPDATE NO ACTION); CREATE INDEX user_id_index \nON test_table_name (user);\nCREATE INDEX channel_index \nON test_table_name (channel);\nCREATE INDEX created_index \nON test_table_name (created);",
+				Original: SQLiteClient{}.ToSql(new(Query).
+					Create(&model).
+					AddIndex(dto.Index{
+						Name:   "user_id_index",
+						Target: model.GetTableName(),
+						Key:    "user",
+						Unique: false,
+					}).
+					AddIndex(dto.Index{
+						Name:   "channel_index",
+						Target: model.GetTableName(),
+						Key:    "channel",
+						Unique: false,
+					}).
+					AddIndex(dto.Index{
+						Name:   "created_index",
+						Target: model.GetTableName(),
+						Key:    "created",
+						Unique: false,
+					}).
+					AddForeignKey(dto.ForeignKey{
+						Name: "event_id",
+						Target: query.Reference{
+							Table: otherModel.GetTableName(),
+							Key:   "id",
+						},
+						With: query.Reference{
+							Table: model.GetTableName(),
+							Key:   "event_id",
+						},
+						OnDelete: dto.CascadeAction,
+						OnUpdate: dto.NoActionAction,
+					}).
+					AddForeignKey(dto.ForeignKey{
+						Name: "scenario_id",
+						Target: query.Reference{
+							Table: otherModel2.GetTableName(),
+							Key:   "id",
+						},
+						With: query.Reference{
+							Table: model.GetTableName(),
+							Key:   "scenario_id",
+						},
+						OnDelete: dto.CascadeAction,
+						OnUpdate: dto.NoActionAction,
+					})),
+			},
 			{
 				Expected: "CREATE TABLE test_table_name (id INTEGER CONSTRAINT test_table_name_pk primary key autoincrement, relation_id INTEGER NOT NULL, relation_id2 INTEGER NOT NULL, title VARCHAR DEFAULT \"test\" NOT NULL, description VARCHAR NULL);",
 				Original: SQLiteClient{}.ToSql(new(Query).Create(&model)),
