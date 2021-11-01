@@ -132,4 +132,5 @@ Please see the [examples.go](examples.go) file.
 
 ### Other notes
 - [table renaming](documentation/rename-table.md)
+- [CREATE TABLE statement](documentation/create-tables.md)
 - [SQLite warnings](documentation/sqlite-warnings.md)
