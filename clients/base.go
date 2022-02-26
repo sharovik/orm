@@ -10,18 +10,18 @@ import (
 const (
 	CreateType = "CREATE"
 	AlterType  = "ALTER"
-	RenameType  = "RENAME"
+	RenameType = "RENAME"
 	DropType   = "DROP"
 	SelectType = "SELECT"
 	InsertType = "INSERT"
 	UpdateType = "UPDATE"
 	DeleteType = "DELETE"
 
-	DatabaseTypeMySQL = "mysql"
-	DatabaseTypeSqlite = "sqlite"
+	DatabaseTypeMySQL   = "mysql"
+	DatabaseTypeSqlite  = "sqlite"
 	DefaultDatabaseType = DatabaseTypeSqlite
 
-	DefaultEngine = "InnoDB"
+	DefaultEngine  = "InnoDB"
 	DefaultCharset = "utf8mb4"
 	DefaultCollate = "utf8mb4_0900_ai_ci"
 )
@@ -36,7 +36,7 @@ type DatabaseConfig struct {
 	Engine   string
 	Charset  string
 	Collate  string
-	Type string
+	Type     string
 }
 
 func (c DatabaseConfig) GetType() string {
@@ -134,7 +134,7 @@ type QueryInterface interface {
 	GetValues() interface{}
 
 	//From using this method you can specify the ORDER BY fields with the right direction to order.
-	From(model dto.ModelInterface) QueryInterface
+	From(model interface{}) QueryInterface
 
 	//IfNotExists Sets the IfNotExists flag. Method can be used in the combination with CREATE TABLE statement to have condition CREATE TABLE IF NOT EXISTS
 	IfNotExists() QueryInterface
@@ -262,8 +262,17 @@ func (q Query) GetLimit() query.Limit {
 }
 
 //From using this method you can specify the ORDER BY fields with the right direction to order.
-func (q *Query) From(model dto.ModelInterface) QueryInterface {
-	q.destination = model
+func (q *Query) From(model interface{}) QueryInterface {
+	switch v := model.(type) {
+	case dto.ModelInterface:
+		q.destination = v
+		break
+	case string:
+		q.destination = &dto.BaseModel{
+			TableName: v,
+		}
+	}
+
 	return q
 }
 
@@ -396,7 +405,7 @@ func (q *Query) Drop(model dto.ModelInterface) QueryInterface {
 func (q *Query) Rename(table string, newTableName string) QueryInterface {
 	q.queryType = RenameType
 	q.From(&dto.BaseModel{
-		TableName:  table,
+		TableName: table,
 	})
 	q.newTableName = newTableName
 	return q
