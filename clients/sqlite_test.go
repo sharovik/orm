@@ -961,6 +961,18 @@ func initTestModel(table string) dto.BaseModel {
 	}
 }
 
+func TestFromInterfaceUsage(t *testing.T) {
+	var actual string
+	q := new(Query).Select([]interface{}{"id", "name"}).From("test_table")
+	actual = SQLiteClient{}.ToSql(q)
+	assert.NotEmpty(t, actual)
+	assert.Equal(t, "SELECT id, name FROM test_table", actual)
+
+	actual = MySQLClient{}.ToSql(q)
+	assert.NotEmpty(t, actual)
+	assert.Equal(t, "SELECT id, name FROM test_table", actual)
+}
+
 func initDatabase() {
 	_, err := os.Create(testSQLiteDatabasePath)
 	if err != nil {

@@ -50,7 +50,14 @@ Which is equal to
 ```sql
 SELECT col1, col2 FROM test_table_name
 ```
-
+If you don't want to use model for your query, you can pass the table name string as argument for `From` method.
+```go
+results, err := databaseClient.Execute(new(Query).Select([]interface{}{"col1", "col2"}).From("test_table_name"))
+```
+The output of that combination will be:
+```sql
+SELECT col1, col2 FROM test_table_name
+```
 OR you can also build more complex queries, like:
 ```sql
 SELECT id, another_id FROM test_table_name 
@@ -125,7 +132,7 @@ result, err := client.Execute(q)
 ```
 This will generate the next prepared query
 ```sql
-SELECT id, name WHERE name = ?
+SELECT id, name FROM test_table_name WHERE name = ?
 ```
 ### More examples
 Please see the [examples.go](examples.go) file. 
