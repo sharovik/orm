@@ -27,7 +27,7 @@ func (c MySQLClient) Connect(config DatabaseConfig) (client BaseClientInterface,
 
 func (c MySQLClient) generateDSN() string {
 	var (
-		//We init DSN with the username only
+		//We initialise DSN with the username only
 		dsn = fmt.Sprintf("%s", c.Config.Username)
 	)
 
@@ -105,24 +105,28 @@ func (c MySQLClient) Execute(q QueryInterface) (result dto.BaseResult, err error
 
 	switch q.GetQueryType() {
 	case SelectType:
-		return c.executeSelect(queryStr, bindings)
+		result, err = c.executeSelect(queryStr, bindings)
 	case CreateType:
-		return c.executeQuery(queryStr, bindings)
+		result, err = c.executeQuery(queryStr, bindings)
 	case AlterType:
-		return c.executeQuery(queryStr, bindings)
-	case DeleteType:
-		return c.executeQuery(queryStr, bindings)
+		result, err = c.executeQuery(queryStr, bindings)
 	case RenameType:
-		return c.executeQuery(queryStr, bindings)
+		result, err = c.executeQuery(queryStr, bindings)
+	case DeleteType:
+		result, err = c.executeQuery(queryStr, bindings)
 	case DropType:
-		return c.executeQuery(queryStr, bindings)
+		result, err = c.executeQuery(queryStr, bindings)
 	case InsertType:
-		return c.executeQuery(queryStr, bindings)
+		result, err = c.executeQuery(queryStr, bindings)
 	case UpdateType:
-		return c.executeQuery(queryStr, bindings)
+		result, err = c.executeQuery(queryStr, bindings)
 	}
 
-	return result, nil
+	if err != nil {
+		return result, err
+	}
+
+	return prepareResult(q.GetDestination(), result), nil
 }
 
 func (c MySQLClient) executeSelect(queryStr string, bindings []interface{}) (result dto.BaseResult, err error) {
@@ -139,7 +143,7 @@ func (c MySQLClient) executeSelect(queryStr string, bindings []interface{}) (res
 	}
 
 	var values = make([]interface{}, len(columns))
-	for i, _ := range values {
+	for i := range values {
 		var f interface{}
 		values[i] = &f
 	}
@@ -161,9 +165,9 @@ func (c MySQLClient) executeSelect(queryStr string, bindings []interface{}) (res
 		for i, name := range columns {
 			value := *(values[i].(*interface{}))
 			model.AddModelField(dto.ModelField{
-				Name:          name,
-				Type:          columnTypes[i],
-				Value:         normalizeValue(value, columnTypes[i]),
+				Name:  name,
+				Type:  columnTypes[i],
+				Value: normalizeValue(value, columnTypes[i]),
 			})
 		}
 
@@ -201,7 +205,7 @@ func (c MySQLClient) prepareCreateSQLQuery(q QueryInterface) string {
 	if q.GetDestination().GetPrimaryKey() != *(new(dto.ModelField)) {
 		queryStr += generateColumnSQLStr(q.GetDestination().GetPrimaryKey())
 
-		if  len(q.GetDestination().GetColumns()) > 0 {
+		if len(q.GetDestination().GetColumns()) > 1 {
 			queryStr += ", "
 		}
 	}
@@ -222,7 +226,21 @@ func (c MySQLClient) prepareCreateSQLQuery(q QueryInterface) string {
 		queryStr += fmt.Sprintf(",\n%s", generateIndexesSQLStr(q.GetIndexesToAdd()))
 	}
 
-	queryStr += fmt.Sprintf(") ENGINE=%s DEFAULT CHARSET=%s COLLATE=%s;", c.Config.GetEngine(), c.Config.GetCharset(), c.Config.GetCollate())
+	queryStr += fmt.Sprintf(")")
+
+	if c.Config.GetEngine() != "" {
+		queryStr += fmt.Sprintf(" ENGINE=%s", c.Config.GetEngine())
+	}
+
+	if c.Config.GetCharset() != "" {
+		queryStr += fmt.Sprintf(" DEFAULT CHARSET=%s", c.Config.GetCharset())
+	}
+
+	if c.Config.GetCollate() != "" {
+		queryStr += fmt.Sprintf(" COLLATE=%s", c.Config.GetCollate())
+	}
+
+	queryStr += fmt.Sprintf(";")
 
 	return queryStr
 }

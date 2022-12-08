@@ -29,36 +29,65 @@ databaseClient, err := clients.InitClient(clients.DatabaseConfig{
     Password: "secret",
     Database: "test",
     Type:     clients.DatabaseTypeMySQL,
-    Port:     0,
 })
 
 ```
 ### Start using the query builder
+There are several ways, how you can communicate with database using this query builder
+
+#### Using model
 ```go
-//Create model for needle table
-var model = dto.BaseModel{
-    TableName: "test_table_name"
+package main
+
+import "github.com/sharovik/orm/dto"
+
+type TestTableModel struct {
+	dto.BaseModel
 }
 
-//Get results sqlite
-results, err := databaseClient.Execute(new(Query).Select([]interface{}{"col1", "col2"}).From(&model))
+func main() {
+	model := new(TestTableModel)
+	model.SetTableName("test_table_name")
+	model.SetPrimaryKey(dto.ModelField{
+		Name:          "id",
+		Type:          "integer",
+		Value:         nil,
+		Default:       nil,
+		Length:        0,
+		IsNullable:    false,
+		IsUnsigned:    true,
+		AutoIncrement: true,
+	})
+	model.AddModelField(dto.ModelField{
+		Name:          "another_id",
+		Type:          dto.IntegerColumnType,
+		Value:         nil,
+		Default:       nil,
+		Length:        0,
+		IsNullable:    true,
+		IsPrimaryKey:  false,
+		IsUnsigned:    true,
+		AutoIncrement: false,
+	})
 
-//Get results mysql
-results, err := databaseClient.Execute(new(Query).Select([]interface{}{"col1", "col2"}).From(&model))
+	//Get results sqlite
+	results, err := databaseClient.Execute(new(Query).Select([]interface{}{"col1", "col2"}).From(&model))
+    
+    //do something with the results...
+}
 ```
-Which is equal to
+This code will execute the next SQL query
 ```sql
 SELECT col1, col2 FROM test_table_name
 ```
+#### Without model
 If you don't want to use model for your query, you can pass the table name string as argument for `From` method.
 ```go
 results, err := databaseClient.Execute(new(Query).Select([]interface{}{"col1", "col2"}).From("test_table_name"))
 ```
-The output of that combination will be:
-```sql
-SELECT col1, col2 FROM test_table_name
-```
-OR you can also build more complex queries, like:
+
+### Complex queries
+You can also build more complex queries, like:
 ```sql
 SELECT id, another_id FROM test_table_name 
 LEFT JOIN another ON another.id = test_table_name.another_id
