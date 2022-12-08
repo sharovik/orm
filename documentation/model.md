@@ -8,6 +8,11 @@ model := dto.BaseModel{
     TableName: "my_table_name",
     Fields: []interface{}{
         dto.ModelField{
+            Name:          "id",
+            Type:          dto.IntegerColumnType,
+            AutoIncrement: true,
+        },
+        dto.ModelField{
             Name:  "relation_id",
             Type:  dto.IntegerColumnType,
             Value: int64(1),

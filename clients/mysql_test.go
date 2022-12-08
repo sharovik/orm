@@ -11,24 +11,24 @@ var (
 	MySqlSelectCases = [...]expectation{
 		{
 			Expected: "SELECT col1, col2 FROM test_table_name",
-			Original: SQLiteClient{}.ToSql(new(Query).Select(columns).From(&model)),
+			Original: MySQLClient{}.ToSql(new(Query).Select(columns).From(&m)),
 		},
 		{
 			Expected: "SELECT * FROM test_table_name",
-			Original: SQLiteClient{}.ToSql(new(Query).Select([]interface{}{}).From(&model)),
+			Original: MySQLClient{}.ToSql(new(Query).Select([]interface{}{}).From(&m)),
 		},
 		{
 			Expected: "SELECT * FROM test_table_name LEFT JOIN test_table_name2 ON (test_table_name2.id = test_table_name.relation_id)",
-			Original: SQLiteClient{}.ToSql(new(Query).Select(nil).
-				From(&model).
+			Original: MySQLClient{}.ToSql(new(Query).Select(nil).
+				From(&m).
 				Join(query.Join{
 					Target: query.Reference{
 						Table: model2.GetTableName(),
 						Key:   model2.GetField("id").Name,
 					},
 					With: query.Reference{
-						Table: model.GetTableName(),
-						Key:   model.GetField("relation_id").Name,
+						Table: m.GetTableName(),
+						Key:   m.GetField("relation_id").Name,
 					},
 					Condition: "=",
 					Type:      query.LeftJoinType,
@@ -36,69 +36,69 @@ var (
 		},
 		{
 			Expected: "SELECT * FROM test_table_name LEFT JOIN test_table_name2 ON (test_table_name2.id = test_table_name.relation_id) ORDER BY id DESC",
-			Original: SQLiteClient{}.ToSql(new(Query).Select([]interface{}{}).
-				From(&model).
+			Original: MySQLClient{}.ToSql(new(Query).Select([]interface{}{}).
+				From(&m).
 				Join(query.Join{
 					Target: query.Reference{
 						Table: model2.GetTableName(),
 						Key:   model2.GetField("id").Name,
 					},
 					With: query.Reference{
-						Table: model.GetTableName(),
-						Key:   model.GetField("relation_id").Name,
+						Table: m.GetTableName(),
+						Key:   m.GetField("relation_id").Name,
 					},
 					Condition: "=",
 					Type:      query.LeftJoinType,
-				}).OrderBy(model.GetPrimaryKey().Name, query.OrderDirectionDesc)),
+				}).OrderBy(m.GetPrimaryKey().Name, query.OrderDirectionDesc)),
 		},
 		{
 			Expected: "SELECT * FROM test_table_name LEFT JOIN test_table_name2 ON (test_table_name2.id = test_table_name.relation_id) ORDER BY id DESC",
-			Original: SQLiteClient{}.ToSql(new(Query).Select([]interface{}{}).
-				From(&model).
+			Original: MySQLClient{}.ToSql(new(Query).Select([]interface{}{}).
+				From(&m).
 				Join(query.Join{
 					Target: query.Reference{
 						Table: model2.GetTableName(),
 						Key:   model2.GetField("id").Name,
 					},
 					With: query.Reference{
-						Table: model.GetTableName(),
-						Key:   model.GetField("relation_id").Name,
+						Table: m.GetTableName(),
+						Key:   m.GetField("relation_id").Name,
 					},
 					Condition: "=",
 					Type:      query.LeftJoinType,
-				}).OrderBy(model.GetPrimaryKey().Name, query.OrderDirectionDesc)),
+				}).OrderBy(m.GetPrimaryKey().Name, query.OrderDirectionDesc)),
 		},
 		{
 			Expected: "SELECT * FROM test_table_name LEFT JOIN test_table_name2 ON (test_table_name2.id = test_table_name.relation_id) GROUP BY test_table_name.id ORDER BY id DESC",
-			Original: SQLiteClient{}.ToSql(new(Query).Select([]interface{}{}).
-				From(&model).
+			Original: MySQLClient{}.ToSql(new(Query).Select([]interface{}{}).
+				From(&m).
 				Join(query.Join{
 					Target: query.Reference{
 						Table: model2.GetTableName(),
 						Key:   model2.GetField("id").Name,
 					},
 					With: query.Reference{
-						Table: model.GetTableName(),
-						Key:   model.GetField("relation_id").Name,
+						Table: m.GetTableName(),
+						Key:   m.GetField("relation_id").Name,
 					},
 					Condition: "=",
 					Type:      query.LeftJoinType,
 				}).
-				OrderBy(model.GetPrimaryKey().Name, query.OrderDirectionDesc).
+				OrderBy(m.GetPrimaryKey().Name, query.OrderDirectionDesc).
 				GroupBy("test_table_name.id")),
 		},
 		{
 			Expected: "SELECT * FROM test_table_name LEFT JOIN test_table_name2 ON (test_table_name2.id = test_table_name.relation_id) WHERE test_table_name2.relation_id = 2 GROUP BY test_table_name.id ORDER BY id DESC",
-			Original: SQLiteClient{}.ToSql(new(Query).Select([]interface{}{}).
-				From(&model).
+			Original: MySQLClient{}.ToSql(new(Query).Select([]interface{}{}).
+				From(&m).
 				Join(query.Join{
 					Target: query.Reference{
 						Table: model2.GetTableName(),
 						Key:   model2.GetField("id").Name,
 					},
 					With: query.Reference{
-						Table: model.GetTableName(),
-						Key:   model.GetField("relation_id").Name,
+						Table: m.GetTableName(),
+						Key:   m.GetField("relation_id").Name,
 					},
 					Condition: "=",
 					Type:      query.LeftJoinType,
@@ -108,13 +108,13 @@ var (
 					Operator: "=",
 					Second:   "2",
 				}).
-				OrderBy(model.GetPrimaryKey().Name, query.OrderDirectionDesc).
+				OrderBy(m.GetPrimaryKey().Name, query.OrderDirectionDesc).
 				GroupBy("test_table_name.id")),
 		},
 		{
 			Expected: `SELECT * FROM test_table_name WHERE test_table_name2.relation_id = 2 AND col1 = "test" LIMIT 11`,
-			Original: SQLiteClient{}.ToSql(new(Query).Select([]interface{}{}).
-				From(&model).
+			Original: MySQLClient{}.ToSql(new(Query).Select([]interface{}{}).
+				From(&m).
 				Where(query.Where{
 					First:    "test_table_name2.relation_id",
 					Operator: "=",
@@ -132,8 +132,8 @@ var (
 		},
 		{
 			Expected: `SELECT * FROM test_table_name WHERE test_table_name2.relation_id = 2 AND col1 = "test" AND ? = ? LIMIT 11`,
-			Original: SQLiteClient{}.ToSql(new(Query).Select([]interface{}{}).
-				From(&model).
+			Original: MySQLClient{}.ToSql(new(Query).Select([]interface{}{}).
+				From(&m).
 				Where(query.Where{
 					First:    "test_table_name2.relation_id",
 					Operator: "=",
@@ -162,8 +162,8 @@ var (
 		},
 		{
 			Expected: `SELECT * FROM test_table_name WHERE test_table_name2.relation_id = 2 OR col1 = "test"`,
-			Original: SQLiteClient{}.ToSql(new(Query).Select([]interface{}{}).
-				From(&model).
+			Original: MySQLClient{}.ToSql(new(Query).Select([]interface{}{}).
+				From(&m).
 				Where(query.Where{
 					First:    "test_table_name2.relation_id",
 					Operator: "=",
@@ -178,8 +178,8 @@ var (
 		},
 		{
 			Expected: `SELECT * FROM test_table_name WHERE test_table_name2.relation_id = 2 OR col1 = "test" NOT col2 = "test"`,
-			Original: SQLiteClient{}.ToSql(new(Query).Select([]interface{}{}).
-				From(&model).
+			Original: MySQLClient{}.ToSql(new(Query).Select([]interface{}{}).
+				From(&m).
 				Where(query.Where{
 					First:    "test_table_name2.relation_id",
 					Operator: "=",
@@ -200,8 +200,8 @@ var (
 		},
 		{
 			Expected: `SELECT * FROM test_table_name WHERE (test_table_name2.relation_id = 2 OR col1 = "test") AND col2 = "test"`,
-			Original: SQLiteClient{}.ToSql(new(Query).Select([]interface{}{}).
-				From(&model).
+			Original: MySQLClient{}.ToSql(new(Query).Select([]interface{}{}).
+				From(&m).
 				Where(query.Where{
 					First: query.Where{
 						First:    "test_table_name2.relation_id",
@@ -226,17 +226,17 @@ var (
 		},
 		{
 			Expected: `SELECT * FROM test_table_name WHERE ((test_table_name2.relation_id = 2 AND col1 = "test") OR col1 = "test") AND col2 = "test"`,
-			Original: SQLiteClient{}.ToSql(new(Query).Select([]interface{}{}).
-				From(&model).
+			Original: MySQLClient{}.ToSql(new(Query).Select([]interface{}{}).
+				From(&m).
 				Where(query.Where{
 					First: query.Where{
-						First:    query.Where{
+						First: query.Where{
 							First:    "test_table_name2.relation_id",
 							Operator: "=",
 							Second:   "2",
 						},
 						Operator: "",
-						Second:   query.Where{
+						Second: query.Where{
 							First:    "col1",
 							Operator: "=",
 							Second:   `"test"`,
@@ -296,7 +296,7 @@ func TestMySQLClient_DropToSql(t *testing.T) {
 		testCases = [...]expectation{
 			{
 				Expected: "DROP TABLE test_table_name",
-				Original: SQLiteClient{}.ToSql(new(Query).Drop(&model)),
+				Original: MySQLClient{}.ToSql(new(Query).Drop(&model)),
 			},
 		}
 	)
@@ -378,35 +378,35 @@ func TestMySQLClient_RenameToSql(t *testing.T) {
 }
 
 func TestMySQLClient_CreateToSql(t *testing.T) {
+	var model = dto.BaseModel{
+		TableName: "test_table_name",
+		Fields: []interface{}{
+			dto.ModelField{
+				Name: "relation_id",
+				Type: dto.IntegerColumnType,
+			},
+			dto.ModelField{
+				Name: "relation_id2",
+				Type: dto.IntegerColumnType,
+			},
+			dto.ModelField{
+				Name:    "title",
+				Type:    dto.VarcharColumnType,
+				Default: "test",
+			},
+			dto.ModelField{
+				Name:       "description",
+				Type:       dto.VarcharColumnType,
+				IsNullable: true,
+			},
+		},
+	}
+	model.SetPrimaryKey(dto.ModelField{
+		Name:          "id",
+		Type:          dto.IntegerColumnType,
+		AutoIncrement: true,
+	})
 	var (
-		model = dto.BaseModel{
-			TableName: "test_table_name",
-			Fields: []interface{}{
-				dto.ModelField{
-					Name: "relation_id",
-					Type: dto.IntegerColumnType,
-				},
-				dto.ModelField{
-					Name: "relation_id2",
-					Type: dto.IntegerColumnType,
-				},
-				dto.ModelField{
-					Name:    "title",
-					Type:    dto.VarcharColumnType,
-					Default: "test",
-				},
-				dto.ModelField{
-					Name:       "description",
-					Type:       dto.VarcharColumnType,
-					IsNullable: true,
-				},
-			},
-			PrimaryKey: dto.ModelField{
-				Name:          "id",
-				Type:          dto.IntegerColumnType,
-				AutoIncrement: true,
-			},
-		}
 		otherModel = dto.BaseModel{
 			TableName:  "some_other_table",
 			PrimaryKey: dto.ModelField{},
@@ -420,8 +420,8 @@ func TestMySQLClient_CreateToSql(t *testing.T) {
 		}
 		testCases = [...]expectation{
 			{
-				Expected: "CREATE TABLE test_table_name (id INTEGER CONSTRAINT test_table_name_pk primary key autoincrement, relation_id INTEGER NOT NULL, relation_id2 INTEGER NOT NULL, title VARCHAR DEFAULT \"test\" NOT NULL, description VARCHAR NULL,\nCONSTRAINT event_id\nFOREIGN KEY (event_id)\n REFERENCES some_other_table (id)\nON DELETE CASCADE\nON UPDATE NO ACTION,\nCONSTRAINT scenario_id\nFOREIGN KEY (scenario_id)\n REFERENCES some_other_table2 (id)\nON DELETE CASCADE\nON UPDATE NO ACTION); CREATE INDEX user_id_index \nON test_table_name (user);\nCREATE INDEX channel_index \nON test_table_name (channel);\nCREATE INDEX created_index \nON test_table_name (created);",
-				Original: SQLiteClient{}.ToSql(new(Query).
+				Expected: "CREATE TABLE test_table_name (id INTEGER NOT NULL AUTO_INCREMENT, relation_id INTEGER NOT NULL, relation_id2 INTEGER NOT NULL, title VARCHAR DEFAULT \"test\" NOT NULL, description VARCHAR NULL,\nPRIMARY KEY (id),\nCONSTRAINT event_id FOREIGN KEY (event_id) REFERENCES some_other_table (id) ON DELETE CASCADE ON UPDATE NO ACTION,\nCONSTRAINT scenario_id FOREIGN KEY (scenario_id) REFERENCES some_other_table2 (id) ON DELETE CASCADE ON UPDATE NO ACTION,\nKEY user_id_index (user),\nKEY channel_index (channel),\nKEY created_index (created));",
+				Original: MySQLClient{}.ToSql(new(Query).
 					Create(&model).
 					AddIndex(dto.Index{
 						Name:   "user_id_index",
@@ -469,12 +469,12 @@ func TestMySQLClient_CreateToSql(t *testing.T) {
 					})),
 			},
 			{
-				Expected: "CREATE TABLE test_table_name (id INTEGER CONSTRAINT test_table_name_pk primary key autoincrement, relation_id INTEGER NOT NULL, relation_id2 INTEGER NOT NULL, title VARCHAR DEFAULT \"test\" NOT NULL, description VARCHAR NULL);",
-				Original: SQLiteClient{}.ToSql(new(Query).Create(&model)),
+				Expected: "CREATE TABLE test_table_name (id INTEGER NOT NULL AUTO_INCREMENT, relation_id INTEGER NOT NULL, relation_id2 INTEGER NOT NULL, title VARCHAR DEFAULT \"test\" NOT NULL, description VARCHAR NULL,\nPRIMARY KEY (id));",
+				Original: MySQLClient{}.ToSql(new(Query).Create(&model)),
 			},
 			{
-				Expected: "CREATE TABLE test_table_name (id INTEGER CONSTRAINT test_table_name_pk primary key autoincrement, relation_id INTEGER NOT NULL, relation_id2 INTEGER NOT NULL, title VARCHAR DEFAULT \"test\" NOT NULL, description VARCHAR NULL,\nCONSTRAINT fk_test\nFOREIGN KEY (relation_id)\n REFERENCES test_table_name2 (id)\nON DELETE NO ACTION\nON UPDATE NO ACTION);",
-				Original: SQLiteClient{}.ToSql(new(Query).Create(&model).
+				Expected: "CREATE TABLE test_table_name (id INTEGER NOT NULL AUTO_INCREMENT, relation_id INTEGER NOT NULL, relation_id2 INTEGER NOT NULL, title VARCHAR DEFAULT \"test\" NOT NULL, description VARCHAR NULL,\nPRIMARY KEY (id),\nCONSTRAINT fk_test FOREIGN KEY (relation_id) REFERENCES test_table_name2 (id) ON DELETE NO ACTION ON UPDATE NO ACTION);",
+				Original: MySQLClient{}.ToSql(new(Query).Create(&model).
 					AddForeignKey(dto.ForeignKey{
 						Name: "fk_test",
 						Target: query.Reference{
@@ -490,8 +490,8 @@ func TestMySQLClient_CreateToSql(t *testing.T) {
 					})),
 			},
 			{
-				Expected: "CREATE TABLE test_table_name (id INTEGER CONSTRAINT test_table_name_pk primary key autoincrement, relation_id INTEGER NOT NULL, relation_id2 INTEGER NOT NULL, title VARCHAR DEFAULT \"test\" NOT NULL, description VARCHAR NULL,\nCONSTRAINT fk_test\nFOREIGN KEY (relation_id)\n REFERENCES test_table_name2 (id)\nON DELETE NO ACTION\nON UPDATE NO ACTION,\nCONSTRAINT fk_test2\nFOREIGN KEY (relation_id2)\n REFERENCES test_table_name3 (id)\nON DELETE CASCADE\nON UPDATE NO ACTION);",
-				Original: SQLiteClient{}.ToSql(new(Query).Create(&model).
+				Expected: "CREATE TABLE test_table_name (id INTEGER NOT NULL AUTO_INCREMENT, relation_id INTEGER NOT NULL, relation_id2 INTEGER NOT NULL, title VARCHAR DEFAULT \"test\" NOT NULL, description VARCHAR NULL,\nPRIMARY KEY (id),\nCONSTRAINT fk_test FOREIGN KEY (relation_id) REFERENCES test_table_name2 (id) ON DELETE NO ACTION ON UPDATE NO ACTION,\nCONSTRAINT fk_test2 FOREIGN KEY (relation_id2) REFERENCES test_table_name3 (id) ON DELETE CASCADE ON UPDATE NO ACTION);",
+				Original: MySQLClient{}.ToSql(new(Query).Create(&model).
 					AddForeignKey(dto.ForeignKey{
 						Name: "fk_test",
 						Target: query.Reference{
@@ -519,8 +519,8 @@ func TestMySQLClient_CreateToSql(t *testing.T) {
 				})),
 			},
 			{
-				Expected: "CREATE TABLE test_table_name (id INTEGER CONSTRAINT test_table_name_pk primary key autoincrement, relation_id INTEGER NOT NULL, relation_id2 INTEGER NOT NULL, title VARCHAR DEFAULT \"test\" NOT NULL, description VARCHAR NULL); CREATE INDEX the_index_name \nON test_table_name (relation_id);",
-				Original: SQLiteClient{}.ToSql(new(Query).Create(&model).
+				Expected: "CREATE TABLE test_table_name (id INTEGER NOT NULL AUTO_INCREMENT, relation_id INTEGER NOT NULL, relation_id2 INTEGER NOT NULL, title VARCHAR DEFAULT \"test\" NOT NULL, description VARCHAR NULL,\nPRIMARY KEY (id),\nKEY the_index_name (relation_id));",
+				Original: MySQLClient{}.ToSql(new(Query).Create(&model).
 					AddIndex(dto.Index{
 						Name:   "the_index_name",
 						Target: model.GetTableName(),
@@ -529,8 +529,8 @@ func TestMySQLClient_CreateToSql(t *testing.T) {
 					})),
 			},
 			{
-				Expected: "CREATE TABLE test_table_name (id INTEGER CONSTRAINT test_table_name_pk primary key autoincrement, relation_id INTEGER NOT NULL, relation_id2 INTEGER NOT NULL, title VARCHAR DEFAULT \"test\" NOT NULL, description VARCHAR NULL); CREATE UNIQUE INDEX the_index_name \nON test_table_name (relation_id);",
-				Original: SQLiteClient{}.ToSql(new(Query).Create(&model).
+				Expected: "CREATE TABLE test_table_name (id INTEGER NOT NULL AUTO_INCREMENT, relation_id INTEGER NOT NULL, relation_id2 INTEGER NOT NULL, title VARCHAR DEFAULT \"test\" NOT NULL, description VARCHAR NULL,\nPRIMARY KEY (id),\nUNIQUE KEY the_index_name (relation_id));",
+				Original: MySQLClient{}.ToSql(new(Query).Create(&model).
 					AddIndex(dto.Index{
 						Name:   "the_index_name",
 						Target: model.GetTableName(),
@@ -539,8 +539,8 @@ func TestMySQLClient_CreateToSql(t *testing.T) {
 					})),
 			},
 			{
-				Expected: "CREATE TABLE IF NOT EXISTS test_table_name (id INTEGER CONSTRAINT test_table_name_pk primary key autoincrement, relation_id INTEGER NOT NULL, relation_id2 INTEGER NOT NULL, title VARCHAR DEFAULT \"test\" NOT NULL, description VARCHAR NULL); CREATE UNIQUE INDEX the_index_name \nON test_table_name (relation_id);",
-				Original: SQLiteClient{}.ToSql(new(Query).Create(&model).
+				Expected: "CREATE TABLE IF NOT EXISTS test_table_name (id INTEGER NOT NULL AUTO_INCREMENT, relation_id INTEGER NOT NULL, relation_id2 INTEGER NOT NULL, title VARCHAR DEFAULT \"test\" NOT NULL, description VARCHAR NULL,\nPRIMARY KEY (id),\nUNIQUE KEY the_index_name (relation_id));",
+				Original: MySQLClient{}.ToSql(new(Query).Create(&model).
 					IfNotExists().
 					AddIndex(dto.Index{
 						Name:   "the_index_name",
@@ -563,11 +563,11 @@ func TestMySQLClient_UpdateToSql(t *testing.T) {
 		testCases = [...]expectation{
 			{
 				Expected: "UPDATE test_table_name SET relation_id = ?, col1 = ?, col2 = ?, col3 = ?",
-				Original: SQLiteClient{}.ToSql(new(Query).Update(&model)),
+				Original: MySQLClient{}.ToSql(new(Query).Update(&model)),
 			},
 			{
 				Expected: "UPDATE test_table_name SET relation_id = ?, col1 = ?, col2 = ?, col3 = ? LEFT JOIN test ON (test.ref_id = test_table_name.id)",
-				Original: SQLiteClient{}.ToSql(new(Query).Update(&model).Join(query.Join{
+				Original: MySQLClient{}.ToSql(new(Query).Update(&model).Join(query.Join{
 					Target: query.Reference{
 						Table: "test",
 						Key:   "ref_id",
@@ -582,7 +582,7 @@ func TestMySQLClient_UpdateToSql(t *testing.T) {
 			},
 			{
 				Expected: "UPDATE test_table_name SET relation_id = ?, col1 = ?, col2 = ?, col3 = ? WHERE relation_id = test",
-				Original: SQLiteClient{}.ToSql(new(Query).Update(&model).Where(query.Where{
+				Original: MySQLClient{}.ToSql(new(Query).Update(&model).Where(query.Where{
 					First:    "relation_id",
 					Operator: "=",
 					Second:   "test",
@@ -603,11 +603,11 @@ func TestMySQLClient_DeleteToSql(t *testing.T) {
 		testCases = [...]expectation{
 			{
 				Expected: "DELETE FROM test_table_name",
-				Original: SQLiteClient{}.ToSql(new(Query).Delete().From(&model)),
+				Original: MySQLClient{}.ToSql(new(Query).Delete().From(&model)),
 			},
 			{
 				Expected: "DELETE FROM test_table_name LEFT JOIN test_table_name2 ON (test_table_name2.id = test_table_name.relation_id)",
-				Original: SQLiteClient{}.ToSql(new(Query).Delete().
+				Original: MySQLClient{}.ToSql(new(Query).Delete().
 					From(&model).
 					Join(query.Join{
 						Target: query.Reference{
@@ -624,21 +624,21 @@ func TestMySQLClient_DeleteToSql(t *testing.T) {
 			},
 			{
 				Expected: "DELETE FROM test_table_name ORDER BY id DESC",
-				Original: SQLiteClient{}.ToSql(new(Query).
+				Original: MySQLClient{}.ToSql(new(Query).
 					Delete().
 					From(&model).
 					OrderBy(model.GetPrimaryKey().Name, query.OrderDirectionDesc)),
 			},
 			{
 				Expected: "DELETE FROM test_table_name GROUP BY test_table_name.id",
-				Original: SQLiteClient{}.ToSql(new(Query).
+				Original: MySQLClient{}.ToSql(new(Query).
 					Delete().
 					From(&model).
 					GroupBy("test_table_name.id")),
 			},
 			{
 				Expected: "DELETE FROM test_table_name WHERE test_table_name.relation_id = 2",
-				Original: SQLiteClient{}.ToSql(new(Query).
+				Original: MySQLClient{}.ToSql(new(Query).
 					Delete().
 					From(&model).
 					Where(query.Where{
@@ -649,7 +649,7 @@ func TestMySQLClient_DeleteToSql(t *testing.T) {
 			},
 			{
 				Expected: `DELETE FROM test_table_name LIMIT 11`,
-				Original: SQLiteClient{}.ToSql(new(Query).
+				Original: MySQLClient{}.ToSql(new(Query).
 					Delete().
 					From(&model).
 					Limit(query.Limit{

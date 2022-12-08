@@ -78,9 +78,9 @@ func generateWhereStr(wheres []query.Where) string {
 
 func whereToStr(where query.Where) string {
 	var (
-		resultStr string
+		resultStr                       string
 		isFirstIsWhere, isSecondIsWhere bool
-		)
+	)
 	switch w := where.First.(type) {
 	case query.Where:
 		resultStr += fmt.Sprintf("%s", whereToStr(w))
@@ -408,7 +408,7 @@ func buildTempTableSQLiteQuery(q QueryInterface) QueryInterface {
 	qb := (new(Query)).Create(&dto.BaseModel{
 		TableName:  fmt.Sprintf("%s%s", TempTablePrefix, q.GetDestination().GetTableName()),
 		PrimaryKey: q.GetDestination().GetPrimaryKey(),
-		Fields: columns,
+		Fields:     columns,
 	})
 
 	for _, column := range q.GetColumns() {
@@ -438,7 +438,7 @@ func prepareAlterSQLiteQuery(q QueryInterface) string {
 	var queryStr = ""
 
 	if isNewSchemaShouldBeGenerated(q) {
-		//We first generate the create statement for the new table
+		//We first generate the "create" statement for the new table
 		qb := buildTempTableSQLiteQuery(q)
 		queryStr = fmt.Sprintf("%s\n", prepareCreateQuery(qb))
 
@@ -468,7 +468,7 @@ func prepareAlterSQLiteQuery(q QueryInterface) string {
 
 		//We drop the old table
 		queryStr += fmt.Sprintf("%s;", prepareDropQuery(new(Query).Drop(&dto.BaseModel{
-			TableName:  fmt.Sprintf("%s%s", OldTablePrefix, q.GetDestination().GetTableName()),
+			TableName: fmt.Sprintf("%s%s", OldTablePrefix, q.GetDestination().GetTableName()),
 		})))
 
 		return queryStr
@@ -569,7 +569,7 @@ func normalizeValue(value interface{}, columnType string) interface{} {
 }
 
 func normalizeColumnType(columnType string) string {
-	switch columnType  {
+	switch columnType {
 	case "INT":
 		return dto.IntegerColumnType
 	case "INTEGER":

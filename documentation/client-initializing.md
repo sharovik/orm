@@ -1,22 +1,32 @@
 # How to initialize the client
 There are several steps which you need to follow, for proper sql client initialisation.
 
-## Database
-Before all, you need to make sure you configured the database configuration.
-To do so, you need to initialize first the configuration for the database connection.
-
+## Database configuration
+In example below you can see the configuration for MySQL database connection
 ```go
-var dCfg = clients.DatabaseConfig{
-    Host:     testSQLiteDatabasePath,
-    Username: "__USERNAME__",//in case if you are using sqlite, please leave that empty
-    Password: "__PASSWORD__",//in case if you are using sqlite, please leave that empty
-    Port:     0,
+var configuration := clients.DatabaseConfig{
+    Host:     "localhost",
+    Username: "root",
+    Password: "secret",
+    Database: "test",
+    Type:     clients.DatabaseTypeMySQL,
+}
+```
+And here is for sqlite
+```go
+var configuration := clients.DatabaseConfig{
+    Host:     "testing.sqlite",
 }
 ```
 ## Create a client
 Once you have a database configuration, you can initialise the client
+### Sqlite
 ```go
-client, err := SQLiteClient{}.Connect(dCfg)
+client, err := SQLiteClient{}.Connect(configuration)
+```
+### MySQL
+```go
+client, err := MySQLClient{}.Connect(configuration)
 ```
 
 Now the client is ready for your first sql query!

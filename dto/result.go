@@ -11,12 +11,12 @@ type ResultInterface interface {
 }
 
 type BaseResult struct {
-	rows []ModelInterface
+	rows     []ModelInterface
 	InsertID int64
-	Err error
+	Err      error
 }
 
-func (r BaseResult) Items() []ModelInterface {
+func (r *BaseResult) Items() []ModelInterface {
 	return r.rows
 }
 
@@ -25,7 +25,7 @@ func (r *BaseResult) AddItem(model ModelInterface) {
 	return
 }
 
-func (r BaseResult) Error() error {
+func (r *BaseResult) Error() error {
 	return r.Err
 }
 
@@ -33,7 +33,7 @@ func (r *BaseResult) SetError(err error) {
 	r.Err = err
 }
 
-func (r BaseResult) LastInsertID() int64 {
+func (r *BaseResult) LastInsertID() int64 {
 	return r.InsertID
 }
 

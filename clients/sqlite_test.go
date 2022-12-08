@@ -18,29 +18,29 @@ type expectation struct {
 
 var (
 	columns           = []interface{}{"col1", "col2"}
-	model             = initTestModel("test_table_name")
+	m                 = initTestModel("test_table_name")
 	model2            = initTestModel("test_table_name2")
 	SqliteSelectCases = [...]expectation{
 		{
 			Expected: "SELECT col1, col2 FROM test_table_name",
-			Original: SQLiteClient{}.ToSql(new(Query).Select(columns).From(&model)),
+			Original: SQLiteClient{}.ToSql(new(Query).Select(columns).From(&m)),
 		},
 		{
 			Expected: "SELECT * FROM test_table_name",
-			Original: SQLiteClient{}.ToSql(new(Query).Select([]interface{}{}).From(&model)),
+			Original: SQLiteClient{}.ToSql(new(Query).Select([]interface{}{}).From(&m)),
 		},
 		{
 			Expected: "SELECT * FROM test_table_name LEFT JOIN test_table_name2 ON (test_table_name2.id = test_table_name.relation_id)",
 			Original: SQLiteClient{}.ToSql(new(Query).Select(nil).
-				From(&model).
+				From(&m).
 				Join(query.Join{
 					Target: query.Reference{
 						Table: model2.GetTableName(),
 						Key:   model2.GetField("id").Name,
 					},
 					With: query.Reference{
-						Table: model.GetTableName(),
-						Key:   model.GetField("relation_id").Name,
+						Table: m.GetTableName(),
+						Key:   m.GetField("relation_id").Name,
 					},
 					Condition: "=",
 					Type:      query.LeftJoinType,
@@ -49,68 +49,68 @@ var (
 		{
 			Expected: "SELECT * FROM test_table_name LEFT JOIN test_table_name2 ON (test_table_name2.id = test_table_name.relation_id) ORDER BY id DESC",
 			Original: SQLiteClient{}.ToSql(new(Query).Select([]interface{}{}).
-				From(&model).
+				From(&m).
 				Join(query.Join{
 					Target: query.Reference{
 						Table: model2.GetTableName(),
 						Key:   model2.GetField("id").Name,
 					},
 					With: query.Reference{
-						Table: model.GetTableName(),
-						Key:   model.GetField("relation_id").Name,
+						Table: m.GetTableName(),
+						Key:   m.GetField("relation_id").Name,
 					},
 					Condition: "=",
 					Type:      query.LeftJoinType,
-				}).OrderBy(model.GetPrimaryKey().Name, query.OrderDirectionDesc)),
+				}).OrderBy(m.GetPrimaryKey().Name, query.OrderDirectionDesc)),
 		},
 		{
 			Expected: "SELECT * FROM test_table_name LEFT JOIN test_table_name2 ON (test_table_name2.id = test_table_name.relation_id) ORDER BY id DESC",
 			Original: SQLiteClient{}.ToSql(new(Query).Select([]interface{}{}).
-				From(&model).
+				From(&m).
 				Join(query.Join{
 					Target: query.Reference{
 						Table: model2.GetTableName(),
 						Key:   model2.GetField("id").Name,
 					},
 					With: query.Reference{
-						Table: model.GetTableName(),
-						Key:   model.GetField("relation_id").Name,
+						Table: m.GetTableName(),
+						Key:   m.GetField("relation_id").Name,
 					},
 					Condition: "=",
 					Type:      query.LeftJoinType,
-				}).OrderBy(model.GetPrimaryKey().Name, query.OrderDirectionDesc)),
+				}).OrderBy(m.GetPrimaryKey().Name, query.OrderDirectionDesc)),
 		},
 		{
 			Expected: "SELECT * FROM test_table_name LEFT JOIN test_table_name2 ON (test_table_name2.id = test_table_name.relation_id) GROUP BY test_table_name.id ORDER BY id DESC",
 			Original: SQLiteClient{}.ToSql(new(Query).Select([]interface{}{}).
-				From(&model).
+				From(&m).
 				Join(query.Join{
 					Target: query.Reference{
 						Table: model2.GetTableName(),
 						Key:   model2.GetField("id").Name,
 					},
 					With: query.Reference{
-						Table: model.GetTableName(),
-						Key:   model.GetField("relation_id").Name,
+						Table: m.GetTableName(),
+						Key:   m.GetField("relation_id").Name,
 					},
 					Condition: "=",
 					Type:      query.LeftJoinType,
 				}).
-				OrderBy(model.GetPrimaryKey().Name, query.OrderDirectionDesc).
+				OrderBy(m.GetPrimaryKey().Name, query.OrderDirectionDesc).
 				GroupBy("test_table_name.id")),
 		},
 		{
 			Expected: "SELECT * FROM test_table_name LEFT JOIN test_table_name2 ON (test_table_name2.id = test_table_name.relation_id) WHERE test_table_name2.relation_id = 2 GROUP BY test_table_name.id ORDER BY id DESC",
 			Original: SQLiteClient{}.ToSql(new(Query).Select([]interface{}{}).
-				From(&model).
+				From(&m).
 				Join(query.Join{
 					Target: query.Reference{
 						Table: model2.GetTableName(),
 						Key:   model2.GetField("id").Name,
 					},
 					With: query.Reference{
-						Table: model.GetTableName(),
-						Key:   model.GetField("relation_id").Name,
+						Table: m.GetTableName(),
+						Key:   m.GetField("relation_id").Name,
 					},
 					Condition: "=",
 					Type:      query.LeftJoinType,
@@ -120,13 +120,13 @@ var (
 					Operator: "=",
 					Second:   "2",
 				}).
-				OrderBy(model.GetPrimaryKey().Name, query.OrderDirectionDesc).
+				OrderBy(m.GetPrimaryKey().Name, query.OrderDirectionDesc).
 				GroupBy("test_table_name.id")),
 		},
 		{
 			Expected: `SELECT * FROM test_table_name WHERE test_table_name2.relation_id = 2 AND col1 = "test" LIMIT 11`,
 			Original: SQLiteClient{}.ToSql(new(Query).Select([]interface{}{}).
-				From(&model).
+				From(&m).
 				Where(query.Where{
 					First:    "test_table_name2.relation_id",
 					Operator: "=",
@@ -145,7 +145,7 @@ var (
 		{
 			Expected: `SELECT * FROM test_table_name WHERE test_table_name2.relation_id = 2 AND col1 = "test" AND ? = ? LIMIT 11`,
 			Original: SQLiteClient{}.ToSql(new(Query).Select([]interface{}{}).
-				From(&model).
+				From(&m).
 				Where(query.Where{
 					First:    "test_table_name2.relation_id",
 					Operator: "=",
@@ -175,7 +175,7 @@ var (
 		{
 			Expected: `SELECT * FROM test_table_name WHERE test_table_name2.relation_id = 2 OR col1 = "test"`,
 			Original: SQLiteClient{}.ToSql(new(Query).Select([]interface{}{}).
-				From(&model).
+				From(&m).
 				Where(query.Where{
 					First:    "test_table_name2.relation_id",
 					Operator: "=",
@@ -191,7 +191,7 @@ var (
 		{
 			Expected: `SELECT * FROM test_table_name WHERE test_table_name2.relation_id = 2 OR col1 = "test" NOT col2 = "test"`,
 			Original: SQLiteClient{}.ToSql(new(Query).Select([]interface{}{}).
-				From(&model).
+				From(&m).
 				Where(query.Where{
 					First:    "test_table_name2.relation_id",
 					Operator: "=",
@@ -213,7 +213,7 @@ var (
 		{
 			Expected: `SELECT * FROM test_table_name WHERE (test_table_name2.relation_id = 2 OR col1 = "test") AND col2 = "test"`,
 			Original: SQLiteClient{}.ToSql(new(Query).Select([]interface{}{}).
-				From(&model).
+				From(&m).
 				Where(query.Where{
 					First: query.Where{
 						First:    "test_table_name2.relation_id",
@@ -239,7 +239,7 @@ var (
 		{
 			Expected: `SELECT * FROM test_table_name WHERE ((test_table_name2.relation_id = 2 AND col1 = "test") OR col1 = "test") AND col2 = "test"`,
 			Original: SQLiteClient{}.ToSql(new(Query).Select([]interface{}{}).
-				From(&model).
+				From(&m).
 				Where(query.Where{
 					First: query.Where{
 						First: query.Where{
@@ -438,36 +438,35 @@ func TestSQLiteClient_AlterToSql(t *testing.T) {
 }
 
 func TestSQLiteClient_CreateToSql(t *testing.T) {
+	var model = dto.BaseModel{
+		TableName: "test_table_name",
+		Fields: []interface{}{
+			dto.ModelField{
+				Name: "relation_id",
+				Type: dto.IntegerColumnType,
+			},
+			dto.ModelField{
+				Name: "relation_id2",
+				Type: dto.IntegerColumnType,
+			},
+			dto.ModelField{
+				Name:    "title",
+				Type:    dto.VarcharColumnType,
+				Default: "test",
+			},
+			dto.ModelField{
+				Name:       "description",
+				Type:       dto.VarcharColumnType,
+				IsNullable: true,
+			},
+		},
+	}
+	model.SetPrimaryKey(dto.ModelField{
+		Name:          "id",
+		Type:          dto.IntegerColumnType,
+		AutoIncrement: true,
+	})
 	var (
-		model = dto.BaseModel{
-			TableName: "test_table_name",
-			Fields: []interface{}{
-				dto.ModelField{
-					Name: "relation_id",
-					Type: dto.IntegerColumnType,
-				},
-				dto.ModelField{
-					Name: "relation_id2",
-					Type: dto.IntegerColumnType,
-				},
-				dto.ModelField{
-					Name:    "title",
-					Type:    dto.VarcharColumnType,
-					Default: "test",
-				},
-				dto.ModelField{
-					Name:       "description",
-					Type:       dto.VarcharColumnType,
-					IsNullable: true,
-				},
-			},
-			PrimaryKey: dto.ModelField{
-				Name:          "id",
-				Type:          dto.IntegerColumnType,
-				AutoIncrement: true,
-			},
-		}
-
 		otherModel = dto.BaseModel{
 			TableName:  "some_other_table",
 			PrimaryKey: dto.ModelField{},
@@ -778,14 +777,17 @@ func TestSQLiteClient_Execute(t *testing.T) {
 				Default:       v.Default,
 				Length:        v.Length,
 				IsNullable:    v.IsNullable,
-				IsPrimaryKey:  false,
-				AutoIncrement: false,
+				IsPrimaryKey:  v.IsPrimaryKey,
+				AutoIncrement: v.AutoIncrement,
 			})
 		}
 	}
 	assert.Equal(t, expected, res.Items()[0].GetColumns())
 
-	model.SetField("relation_id", 2)
+	model.AddModelField(dto.ModelField{
+		Name:  "relation_id",
+		Value: 2,
+	})
 
 	//And it's time for updates
 	res, err = sqliteClient.Execute(new(Query).Update(&model))
@@ -802,19 +804,24 @@ func TestSQLiteClient_Execute(t *testing.T) {
 	assert.NoError(t, res.Err)
 	assert.Len(t, res.Items(), 1)
 
-	expected = []interface{}{
-		dto.ModelField{
-			Name:  "id",
-			Type:  "INTEGER",
-			Value: 1,
+	exp := []dto.ModelField{
+		{
+			Name:          "id",
+			Type:          "INTEGER",
+			Value:         1,
+			IsPrimaryKey:  true,
+			AutoIncrement: true,
 		},
-		dto.ModelField{
+		{
 			Name:  "relation_id",
 			Type:  "INTEGER",
 			Value: 2,
 		},
 	}
-	assert.Equal(t, expected, res.Items()[0].GetColumns())
+
+	for _, field := range exp {
+		assert.Equal(t, field, res.Items()[0].GetField(field.Name))
+	}
 
 	//Now we delete that row
 	res, err = sqliteClient.Execute(new(Query).Delete().From(&model))
@@ -929,7 +936,7 @@ func TestSQLiteClient_Execute(t *testing.T) {
 }
 
 func initTestModel(table string) dto.BaseModel {
-	return dto.BaseModel{
+	model := dto.BaseModel{
 		TableName: table,
 		Fields: []interface{}{
 			dto.ModelField{
@@ -953,12 +960,13 @@ func initTestModel(table string) dto.BaseModel {
 				Value: "Test",
 			},
 		},
-		PrimaryKey: dto.ModelField{
-			Name:          "id",
-			Type:          dto.IntegerColumnType,
-			AutoIncrement: true,
-		},
 	}
+	model.SetPrimaryKey(dto.ModelField{
+		Name:          "id",
+		Type:          dto.IntegerColumnType,
+		AutoIncrement: true,
+	})
+	return model
 }
 
 func TestFromInterfaceUsage(t *testing.T) {

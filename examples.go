@@ -7,6 +7,14 @@ import (
 	"github.com/sharovik/orm/query"
 )
 
+type AnotherModel struct {
+	dto.BaseModel
+}
+
+type TestTableModel struct {
+	dto.BaseModel
+}
+
 func main() {
 	//We create database configuration for MySQL database
 	configuration := clients.DatabaseConfig{
@@ -15,7 +23,6 @@ func main() {
 		Password: "secret",
 		Database: "test",
 		Type:     clients.DatabaseTypeMySQL,
-		Port:     0,
 	}
 
 	client, err := clients.InitClient(configuration)
@@ -24,7 +31,7 @@ func main() {
 		return
 	}
 
-	another := new(dto.BaseModel)
+	another := new(AnotherModel)
 	another.SetTableName("another")
 	another.SetPrimaryKey(dto.ModelField{
 		Name:          "id",
@@ -42,10 +49,9 @@ func main() {
 	res, err := client.Execute(q)
 	if err != nil {
 		panic(err)
-		return
 	}
 
-	model := new(dto.BaseModel)
+	model := new(TestTableModel)
 	model.SetTableName("test_table_name")
 	model.SetPrimaryKey(dto.ModelField{
 		Name:          "id",
@@ -113,11 +119,10 @@ func main() {
 		Target: model.TableName,
 		Key:    "test_field",
 		Unique: true,
-	})
+	}).IfNotExists()
 	res, err = client.Execute(q)
 	if err != nil {
 		panic(err)
-		return
 	}
 
 	//We select specific columns from the table
@@ -128,7 +133,15 @@ func main() {
 	fmt.Println(res)
 	if err != nil {
 		panic(err)
-		return
+	}
+
+	//We select specific columns from the table
+	q = new(clients.Query).Select(columns).From(model.TableName)
+	res, err = client.Execute(q)
+	fmt.Println(err)
+	fmt.Println(res)
+	if err != nil {
+		panic(err)
 	}
 
 	//We do select with join to other table
@@ -151,7 +164,6 @@ func main() {
 	fmt.Println(res)
 	if err != nil {
 		panic(err)
-		return
 	}
 
 	//We insert new item into our table
@@ -161,7 +173,6 @@ func main() {
 	fmt.Println(res)
 	if err != nil {
 		panic(err)
-		return
 	}
 
 	//We select all model columns from our table
@@ -171,7 +182,6 @@ func main() {
 	fmt.Println(res)
 	if err != nil {
 		panic(err)
-		return
 	}
 
 	//We do select from the table where id = 1 OR id = 2
@@ -193,7 +203,6 @@ func main() {
 	fmt.Println(res)
 	if err != nil {
 		panic(err)
-		return
 	}
 
 	//We do select with the more complex WHERE clause
@@ -202,13 +211,13 @@ func main() {
 	q = new(clients.Query).Select(model.GetColumns()).
 		From(model).
 		Where(query.Where{
-			First:    query.Where{
+			First: query.Where{
 				First:    "id",
 				Operator: "=",
 				Second:   "1",
 			},
 			Operator: "",
-			Second:   query.Where{
+			Second: query.Where{
 				First:    "id",
 				Operator: "=",
 				Second:   "2",
@@ -226,18 +235,26 @@ func main() {
 	fmt.Println(res)
 	if err != nil {
 		panic(err)
-		return
 	}
 
 	//We update the table
-	model.SetField("test_field2", "test test test")
-	q = new(clients.Query).Update(model)
+	model.AddModelField(dto.ModelField{
+		Name:  "test_field2",
+		Value: "test test test",
+	})
+	q = new(clients.Query).Update(model).Where(query.Where{
+		First:    model.GetPrimaryKey().Name,
+		Operator: "=",
+		Second: query.Bind{
+			Field: model.GetPrimaryKey().Name,
+			Value: model.GetPrimaryKey().Value,
+		},
+	})
 	res, err = client.Execute(q)
 	fmt.Println(err)
 	fmt.Println(res)
 	if err != nil {
 		panic(err)
-		return
 	}
 
 	//We alter table
@@ -264,23 +281,21 @@ func main() {
 	fmt.Println(res)
 	if err != nil {
 		panic(err)
-		return
 	}
 
 	//We add new indexes
 	q = new(clients.Query).Alter(model).
 		AddIndex(dto.Index{
-		Name:   "my_brand_new_index",
-		Target: model.GetTableName(),
-		Key:    "new_column",
-		Unique: false,
-	})
+			Name:   "my_brand_new_index",
+			Target: model.GetTableName(),
+			Key:    "new_column",
+			Unique: false,
+		})
 	res, err = client.Execute(q)
 	fmt.Println(err)
 	fmt.Println(res)
 	if err != nil {
 		panic(err)
-		return
 	}
 
 	//We delete item from the table
@@ -296,7 +311,6 @@ func main() {
 	fmt.Println(res)
 	if err != nil {
 		panic(err)
-		return
 	}
 
 	//We drop the table
@@ -306,7 +320,6 @@ func main() {
 	fmt.Println(res)
 	if err != nil {
 		panic(err)
-		return
 	}
 
 	//We rename the another table
@@ -316,20 +329,16 @@ func main() {
 	fmt.Println(res)
 	if err != nil {
 		panic(err)
-		return
 	}
 
 	q = new(clients.Query).Select([]interface{}{}).From(&dto.BaseModel{
-		TableName:  "new_another_table",
-		PrimaryKey: dto.ModelField{},
-		Fields:     nil,
+		TableName: "new_another_table",
 	})
 	res, err = client.Execute(q)
 	fmt.Println(err)
 	fmt.Println(res)
 	if err != nil {
 		panic(err)
-		return
 	}
 
 	//We drop the table
@@ -340,6 +349,5 @@ func main() {
 	fmt.Println(res)
 	if err != nil {
 		panic(err)
-		return
 	}
 }

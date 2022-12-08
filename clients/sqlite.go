@@ -73,24 +73,28 @@ func (c SQLiteClient) Execute(q QueryInterface) (result dto.BaseResult, err erro
 
 	switch q.GetQueryType() {
 	case SelectType:
-		return c.executeSelect(queryStr, bindings)
+		result, err = c.executeSelect(queryStr, bindings)
 	case CreateType:
-		return c.executeQuery(queryStr, bindings)
+		result, err = c.executeQuery(queryStr, bindings)
 	case AlterType:
-		return c.executeQuery(queryStr, bindings)
+		result, err = c.executeQuery(queryStr, bindings)
 	case RenameType:
-		return c.executeQuery(queryStr, bindings)
+		result, err = c.executeQuery(queryStr, bindings)
 	case DeleteType:
-		return c.executeQuery(queryStr, bindings)
+		result, err = c.executeQuery(queryStr, bindings)
 	case DropType:
-		return c.executeQuery(queryStr, bindings)
+		result, err = c.executeQuery(queryStr, bindings)
 	case InsertType:
-		return c.executeQuery(queryStr, bindings)
+		result, err = c.executeQuery(queryStr, bindings)
 	case UpdateType:
-		return c.executeQuery(queryStr, bindings)
+		result, err = c.executeQuery(queryStr, bindings)
 	}
 
-	return result, nil
+	if err != nil {
+		return result, err
+	}
+
+	return prepareResult(q.GetDestination(), result), nil
 }
 
 func (c SQLiteClient) executeSelect(queryStr string, bindings []interface{}) (result dto.BaseResult, err error) {
@@ -107,7 +111,7 @@ func (c SQLiteClient) executeSelect(queryStr string, bindings []interface{}) (re
 	}
 
 	var values = make([]interface{}, len(columns))
-	for i, _ := range values {
+	for i := range values {
 		var f interface{}
 		values[i] = &f
 	}
@@ -129,9 +133,9 @@ func (c SQLiteClient) executeSelect(queryStr string, bindings []interface{}) (re
 		for i, name := range columns {
 			value := *(values[i].(*interface{}))
 			model.AddModelField(dto.ModelField{
-				Name:          name,
-				Type:          columnTypes[i],
-				Value:         normalizeValue(value, columnTypes[i]),
+				Name:  name,
+				Type:  columnTypes[i],
+				Value: normalizeValue(value, columnTypes[i]),
 			})
 		}
 

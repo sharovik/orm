@@ -20,10 +20,6 @@ const (
 	DatabaseTypeMySQL   = "mysql"
 	DatabaseTypeSqlite  = "sqlite"
 	DefaultDatabaseType = DatabaseTypeSqlite
-
-	DefaultEngine  = "InnoDB"
-	DefaultCharset = "utf8mb4"
-	DefaultCollate = "utf8mb4_0900_ai_ci"
 )
 
 //DatabaseConfig the config which will be used by the client
@@ -49,26 +45,14 @@ func (c DatabaseConfig) GetType() string {
 }
 
 func (c DatabaseConfig) GetEngine() string {
-	if c.Engine == "" {
-		return DefaultEngine
-	}
-
 	return c.Engine
 }
 
 func (c DatabaseConfig) GetCharset() string {
-	if c.Charset == "" {
-		return DefaultCharset
-	}
-
 	return c.Charset
 }
 
 func (c DatabaseConfig) GetCollate() string {
-	if c.Collate == "" {
-		return DefaultCollate
-	}
-
 	return c.Collate
 }
 
@@ -91,7 +75,7 @@ type QueryInterface interface {
 
 	//Select using that method you can set the attributes for selection. This method should be used from the beginning of your query, to specify the initial query string.
 	//This method returns the updated Query object.
-	Select(columns []interface{}) QueryInterface
+	Select(columns interface{}) QueryInterface
 
 	//Insert method should be used when you need to insert something into selected table.
 	//It should be used from the beginning of your query, to specify the initial query string.
@@ -114,7 +98,7 @@ type QueryInterface interface {
 	//Delete method deletes the row.
 	Delete() QueryInterface
 
-	//Returns the type of the Query. Eg: INSERT, ALTER, SELECT, DELETE, CREATE, UPDATE, DROP
+	//GetQueryType Returns the type of the Query. Eg: INSERT, ALTER, SELECT, DELETE, CREATE, UPDATE, DROP
 	GetQueryType() string
 	GetNewTableName() string
 	GetDestination() dto.ModelInterface
@@ -201,63 +185,63 @@ type Query struct {
 	limit           query.Limit
 }
 
-func (q Query) GetQueryType() string {
+func (q *Query) GetQueryType() string {
 	return q.queryType
 }
 
-func (q Query) GetNewTableName() string {
+func (q *Query) GetNewTableName() string {
 	return q.newTableName
 }
 
-func (q Query) GetDestination() dto.ModelInterface {
+func (q *Query) GetDestination() dto.ModelInterface {
 	return q.destination
 }
 
-func (q Query) GetColumns() []interface{} {
+func (q *Query) GetColumns() []interface{} {
 	return q.columns
 }
 
-func (q Query) GetColumnsToDrop() []interface{} {
+func (q *Query) GetColumnsToDrop() []interface{} {
 	return q.columnsDrop
 }
 
-func (q Query) GetForeignKeysToAdd() []dto.ForeignKey {
+func (q *Query) GetForeignKeysToAdd() []dto.ForeignKey {
 	return q.foreignKeysAdd
 }
 
-func (q Query) GetForeignKeysToDrop() []dto.ForeignKey {
+func (q *Query) GetForeignKeysToDrop() []dto.ForeignKey {
 	return q.foreignKeysDrop
 }
 
-func (q Query) GetIndexesToAdd() []dto.Index {
+func (q *Query) GetIndexesToAdd() []dto.Index {
 	return q.indexAdd
 }
 
-func (q Query) GetIndexesToDrop() []dto.Index {
+func (q *Query) GetIndexesToDrop() []dto.Index {
 	return q.indexDrop
 }
 
-func (q Query) GetWheres() []query.Where {
+func (q *Query) GetWheres() []query.Where {
 	return q.wheres
 }
 
-func (q Query) GetJoins() []query.Join {
+func (q *Query) GetJoins() []query.Join {
 	return q.joins
 }
 
-func (q Query) GetOrderBy() []query.OrderByColumn {
+func (q *Query) GetOrderBy() []query.OrderByColumn {
 	return q.orderBys
 }
 
-func (q Query) GetGroupBy() []string {
+func (q *Query) GetGroupBy() []string {
 	return q.groupBys
 }
 
-func (q Query) GetBindings() []query.Bind {
+func (q *Query) GetBindings() []query.Bind {
 	return q.bindings
 }
 
-func (q Query) GetLimit() query.Limit {
+func (q *Query) GetLimit() query.Limit {
 	return q.limit
 }
 
@@ -308,7 +292,7 @@ func (q *Query) GroupBy(field string) QueryInterface {
 	return q
 }
 
-//Wheres method needed for WHERE clause configuration.
+//Where method needed for WHERE clause configuration.
 func (q *Query) Where(where query.Where) QueryInterface {
 	switch v := where.First.(type) {
 	case query.Bind:
@@ -328,7 +312,7 @@ func (q *Query) Where(where query.Where) QueryInterface {
 	return q
 }
 
-//Joins method can be used for specification of JOIN clause.
+//Join method can be used for specification of JOIN clause.
 func (q *Query) Join(join query.Join) QueryInterface {
 	q.joins = append(q.joins, join)
 	return q
@@ -352,7 +336,7 @@ func (q *Query) AddForeignKey(field dto.ForeignKey) QueryInterface {
 	return q
 }
 
-//AddForeignKey the method which identifies which foreign key we need to add for selected model in Alter method
+//AddBinding the method which identifies which foreign key we need to add for selected model in Alter method
 func (q *Query) AddBinding(field query.Bind) QueryInterface {
 	q.bindings = append(q.bindings, field)
 	return q
@@ -413,19 +397,28 @@ func (q *Query) Rename(table string, newTableName string) QueryInterface {
 
 //Select using that method you can set the attributes for selection. This method should be used from the beginning of your query, to specify the initial query string.
 //This method returns the updated Query object.
-func (q *Query) Select(columns []interface{}) QueryInterface {
+func (q *Query) Select(columns interface{}) QueryInterface {
 	q.queryType = SelectType
-	for _, field := range columns {
-		switch v := field.(type) {
-		case string:
-			q.AddColumn(dto.ModelField{
-				Name:  v,
-				Type:  "",
-				Value: nil,
-			})
-		case dto.ModelField:
-			q.AddColumn(v)
+	switch c := columns.(type) {
+	case []interface{}:
+		for _, field := range c {
+			switch v := field.(type) {
+			case string:
+				q.AddColumn(dto.ModelField{
+					Name:  v,
+					Type:  "",
+					Value: nil,
+				})
+			case dto.ModelField:
+				q.AddColumn(v)
+			}
 		}
+	case string:
+		q.AddColumn(dto.ModelField{
+			Name:  c,
+			Type:  "",
+			Value: nil,
+		})
 	}
 
 	return q
@@ -464,7 +457,7 @@ func (q *Query) Update(model dto.ModelInterface) QueryInterface {
 	for _, field := range model.GetColumns() {
 		switch v := field.(type) {
 		case dto.ModelField:
-			if v.IsPrimaryKey && v.Value == nil {
+			if v.IsPrimaryKey {
 				continue
 			}
 
@@ -506,4 +499,26 @@ func InitClient(config DatabaseConfig) (BaseClientInterface, error) {
 	}
 
 	return nil, errors.New("Failed to init the database client. ")
+}
+
+func prepareResult(destination dto.ModelInterface, initial dto.BaseResult) (result dto.BaseResult) {
+	if len(initial.Items()) == 0 {
+		return initial
+	}
+
+	result.SetError(initial.Error())
+	result.SetLastInsertID(initial.LastInsertID())
+	for _, value := range initial.Items() {
+		model := destination
+		for _, field := range value.GetColumns() {
+			switch v := field.(type) {
+			case dto.ModelField:
+				model.AddModelField(v)
+			}
+		}
+
+		result.AddItem(model)
+	}
+
+	return result
 }
