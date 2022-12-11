@@ -500,25 +500,3 @@ func InitClient(config DatabaseConfig) (BaseClientInterface, error) {
 
 	return nil, errors.New("Failed to init the database client. ")
 }
-
-func prepareResult(destination dto.ModelInterface, initial dto.BaseResult) (result dto.BaseResult) {
-	if len(initial.Items()) == 0 {
-		return initial
-	}
-
-	result.SetError(initial.Error())
-	result.SetLastInsertID(initial.LastInsertID())
-	for _, value := range initial.Items() {
-		model := destination
-		for _, field := range value.GetColumns() {
-			switch v := field.(type) {
-			case dto.ModelField:
-				model.AddModelField(v)
-			}
-		}
-
-		result.AddItem(model)
-	}
-
-	return result
-}

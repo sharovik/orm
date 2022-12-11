@@ -126,7 +126,7 @@ func (c MySQLClient) Execute(q QueryInterface) (result dto.BaseResult, err error
 		return result, err
 	}
 
-	return prepareResult(q.GetDestination(), result), nil
+	return result, nil
 }
 
 func (c MySQLClient) executeSelect(queryStr string, bindings []interface{}) (result dto.BaseResult, err error) {
