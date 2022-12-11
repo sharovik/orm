@@ -175,6 +175,26 @@ func main() {
 		panic(err)
 	}
 
+	model.AddModelField(dto.ModelField{
+		Name:          "test_field",
+		Type:          dto.VarcharColumnType,
+		Value:         "something2",
+		Default:       "",
+		Length:        255,
+		IsNullable:    true,
+		IsPrimaryKey:  false,
+		AutoIncrement: false,
+	})
+
+	//We insert new item into our table
+	q = new(clients.Query).Insert(model)
+	res, err = client.Execute(q)
+	fmt.Println(err)
+	fmt.Println(res)
+	if err != nil {
+		panic(err)
+	}
+
 	//We select all model columns from our table
 	q = new(clients.Query).Select(model.GetColumns()).From(model)
 	res, err = client.Execute(q)

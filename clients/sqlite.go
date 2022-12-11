@@ -94,7 +94,7 @@ func (c SQLiteClient) Execute(q QueryInterface) (result dto.BaseResult, err erro
 		return result, err
 	}
 
-	return prepareResult(q.GetDestination(), result), nil
+	return result, nil
 }
 
 func (c SQLiteClient) executeSelect(queryStr string, bindings []interface{}) (result dto.BaseResult, err error) {
