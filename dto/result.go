@@ -1,6 +1,6 @@
 package dto
 
-//ResultInterface the interface for the result of query execution
+// ResultInterface the interface for the result of query execution
 type ResultInterface interface {
 	Items() []ModelInterface
 	AddItem(ModelInterface)
@@ -22,7 +22,6 @@ func (r *BaseResult) Items() []ModelInterface {
 
 func (r *BaseResult) AddItem(model ModelInterface) {
 	r.rows = append(r.rows, model)
-	return
 }
 
 func (r *BaseResult) Error() error {

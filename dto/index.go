@@ -3,22 +3,22 @@ package dto
 import "github.com/sharovik/orm/query"
 
 const (
-	CascadeAction = "CASCADE"
+	CascadeAction  = "CASCADE"
 	NoActionAction = "NO ACTION"
-	SetNullAction = "SET NULL"
+	SetNullAction  = "SET NULL"
 )
 
 type Index struct {
-	Name string
+	Name   string
 	Target string
-	Key string
+	Key    string
 	Unique bool
 }
 
 type ForeignKey struct {
-	Name string
-	Target    query.Reference
-	With      query.Reference
+	Name     string
+	Target   query.Reference
+	With     query.Reference
 	OnDelete string
 	OnUpdate string
 }

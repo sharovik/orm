@@ -1,6 +1,6 @@
 package dto
 
-//ModelInterface the main interface for the object model
+// ModelInterface the main interface for the object model
 type ModelInterface interface {
 	GetTableName() string
 	SetTableName(string)
@@ -29,19 +29,6 @@ func (m *BaseModel) GetTableName() string {
 
 func (m *BaseModel) GetColumns() []interface{} {
 	return m.Fields
-}
-
-func isFieldExists(columns []interface{}, field ModelField) bool {
-	for _, column := range columns {
-		switch v := column.(type) {
-		case ModelField:
-			if v.Name == field.Name {
-				return true
-			}
-		}
-	}
-
-	return false
 }
 
 func (m *BaseModel) AddModelField(field ModelField) ModelInterface {

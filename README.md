@@ -163,10 +163,12 @@ This will generate the next prepared query
 ```sql
 SELECT id, name FROM test_table_name WHERE name = ?
 ```
-### More examples
-Please see the [examples.go](examples.go) file. 
+
+Please see the [examples.go](examples.go) file for more queries examples. And also, please check the [documentation files here](documentation).
 
 ### Other notes
 - [table renaming](documentation/rename-table.md)
 - [CREATE TABLE statement](documentation/create-tables.md)
+- [Insert queries](documentation/insert.md)
+- [Models](documentation/model.md)
 - [SQLite warnings](documentation/sqlite-warnings.md)
