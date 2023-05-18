@@ -3,12 +3,13 @@ package clients
 import (
 	"database/sql"
 	"errors"
+	"os"
+
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/sharovik/orm/dto"
-	"os"
 )
 
-//SQLiteClient the SQLite client
+// SQLiteClient the SQLite client
 type SQLiteClient struct {
 	Client *sql.DB
 	Config DatabaseConfig

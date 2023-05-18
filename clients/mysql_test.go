@@ -1,10 +1,11 @@
 package clients
 
 import (
+	"testing"
+
 	"github.com/sharovik/orm/dto"
 	"github.com/sharovik/orm/query"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 var (

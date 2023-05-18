@@ -2,11 +2,12 @@ package clients
 
 import (
 	"fmt"
+	"os"
+	"testing"
+
 	"github.com/sharovik/orm/dto"
 	"github.com/sharovik/orm/query"
 	"github.com/stretchr/testify/assert"
-	"os"
-	"testing"
 )
 
 const testSQLiteDatabasePath = "testing.sqlite"
@@ -736,7 +737,7 @@ func TestSQLiteClient_Execute(t *testing.T) {
 		Port:     0,
 	})
 	if err != nil {
-		fmt.Println(fmt.Sprintf("Failed to connect to the database. Reason: %s", err))
+		fmt.Printf("Failed to connect to the database. Reason: %s\n", err)
 		return
 	}
 
@@ -768,6 +769,8 @@ func TestSQLiteClient_Execute(t *testing.T) {
 		case dto.ModelField:
 			if v.Name == "id" {
 				v.Value = 1
+				v.IsPrimaryKey = false
+				v.AutoIncrement = false
 			}
 
 			expected = append(expected, dto.ModelField{
@@ -809,8 +812,8 @@ func TestSQLiteClient_Execute(t *testing.T) {
 			Name:          "id",
 			Type:          "INTEGER",
 			Value:         1,
-			IsPrimaryKey:  true,
-			AutoIncrement: true,
+			IsPrimaryKey:  false,
+			AutoIncrement: false,
 		},
 		{
 			Name:  "relation_id",

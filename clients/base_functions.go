@@ -3,16 +3,17 @@ package clients
 import (
 	"database/sql"
 	"fmt"
-	"github.com/sharovik/orm/dto"
-	"github.com/sharovik/orm/query"
 	"strconv"
 	"strings"
+
+	"github.com/sharovik/orm/dto"
+	"github.com/sharovik/orm/query"
 )
 
 const TempTablePrefix = "temp_"
 const OldTablePrefix = "old_"
 
-//prepareSelectQuery method prepares the select query statement
+// prepareSelectQuery method prepares the select query statement
 func prepareSelectQuery(q QueryInterface) string {
 	var queryStr = "SELECT "
 
@@ -83,9 +84,8 @@ func whereToStr(where query.Where) string {
 	)
 	switch w := where.First.(type) {
 	case query.Where:
-		resultStr += fmt.Sprintf("%s", whereToStr(w))
+		resultStr += whereToStr(w)
 		isFirstIsWhere = true
-		break
 	default:
 		resultStr += fmt.Sprintf("%s", where.First)
 		resultStr += fmt.Sprintf(" %s ", where.Operator)
@@ -95,7 +95,6 @@ func whereToStr(where query.Where) string {
 	case query.Where:
 		resultStr += fmt.Sprintf(" %s %s", w.GetType(), whereToStr(w))
 		isSecondIsWhere = true
-		break
 	default:
 		resultStr += fmt.Sprintf("%s", where.Second)
 	}
@@ -129,9 +128,7 @@ func generateSelectColumnsStr(columns []interface{}) string {
 func generateGroupByStr(groupBys []string) string {
 	var preparedColumns []string
 	//Target we need to prepare the select columns list
-	for _, column := range groupBys {
-		preparedColumns = append(preparedColumns, column)
-	}
+	preparedColumns = append(preparedColumns, groupBys...)
 
 	return fmt.Sprintf("GROUP BY %s", strings.Join(preparedColumns, ", "))
 }
@@ -167,7 +164,7 @@ func generateBindingsStr(bindings []query.Bind) string {
 	return strings.Join(items, ", ")
 }
 
-//prepareInsertQuery method prepares the insert query statement
+// prepareInsertQuery method prepares the insert query statement
 func prepareInsertQuery(q QueryInterface) string {
 	var queryStr = fmt.Sprintf("INSERT INTO %s", q.GetDestination().GetTableName())
 
@@ -188,16 +185,14 @@ func prepareInsertQuery(q QueryInterface) string {
 	switch v := q.GetValues().(type) {
 	case QueryInterface:
 		queryStr += fmt.Sprintf(" %s", prepareSelectQuery(v))
-		break
 	default:
 		queryStr += fmt.Sprintf(" VALUES (%s)", generateBindingsStr(q.GetBindings()))
-		break
 	}
 
 	return queryStr
 }
 
-//prepareUpdateQuery method prepares the update query statement
+// prepareUpdateQuery method prepares the update query statement
 func prepareUpdateQuery(q QueryInterface) string {
 	queryStr := fmt.Sprintf("UPDATE %s SET", q.GetDestination().GetTableName())
 
@@ -230,7 +225,7 @@ func prepareUpdateQuery(q QueryInterface) string {
 	return queryStr
 }
 
-//prepareDeleteQuery method prepares the delete query statement
+// prepareDeleteQuery method prepares the delete query statement
 func prepareDeleteQuery(q QueryInterface) string {
 	queryStr := fmt.Sprintf("DELETE FROM %s", q.GetDestination().GetTableName())
 
@@ -257,7 +252,7 @@ func prepareDeleteQuery(q QueryInterface) string {
 	return queryStr
 }
 
-//prepareCreateQuery method prepares the create query statement
+// prepareCreateQuery method prepares the create query statement
 func prepareCreateQuery(q QueryInterface) string {
 	ifNotExists := ""
 	if q.GetIfNotExists() {
@@ -313,7 +308,7 @@ func generateColumnStr(column dto.ModelField) string {
 	resultStr += fmt.Sprintf("%s %s", column.Name, column.Type)
 
 	if column.IsUnsigned {
-		resultStr += fmt.Sprintf(" unsigned")
+		resultStr += " unsigned"
 	}
 
 	if column.Default != nil {
@@ -433,7 +428,7 @@ func buildTempTableSQLiteQuery(q QueryInterface) QueryInterface {
 	return qb
 }
 
-//prepareAlterSQLiteQuery method prepares the alter query statement
+// prepareAlterSQLiteQuery method prepares the alter query statement
 func prepareAlterSQLiteQuery(q QueryInterface) string {
 	var queryStr = ""
 
@@ -516,7 +511,7 @@ func prepareAlterSQLiteQuery(q QueryInterface) string {
 	}
 
 	if len(result) > 0 {
-		queryStr += fmt.Sprintf("%s", strings.Join(result, ";\n"))
+		queryStr += strings.Join(result, ";\n")
 	}
 
 	return queryStr
@@ -526,7 +521,7 @@ func prepareRenameTableQuery(q QueryInterface) string {
 	return fmt.Sprintf("ALTER TABLE `%s` RENAME TO `%s`", q.GetDestination().GetTableName(), q.GetNewTableName())
 }
 
-//prepareDropQuery method prepares the drop query statement
+// prepareDropQuery method prepares the drop query statement
 func prepareDropQuery(q QueryInterface) string {
 	return fmt.Sprintf("DROP TABLE %s", q.GetDestination().GetTableName())
 }
@@ -596,16 +591,12 @@ func toSQLValue(value interface{}) string {
 	switch v := value.(type) {
 	case int:
 		resultStr += fmt.Sprintf("%d", v)
-		break
 	case int64:
 		resultStr += fmt.Sprintf("%d", v)
-		break
 	case string:
 		resultStr += fmt.Sprintf(`"%s"`, v)
-		break
 	case bool:
 		resultStr += fmt.Sprintf("%t", v)
-		break
 	}
 
 	return resultStr

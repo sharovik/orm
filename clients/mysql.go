@@ -4,12 +4,13 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strings"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/sharovik/orm/dto"
-	"strings"
 )
 
-//MySQLClient the SQLite client
+// MySQLClient the SQLite client
 type MySQLClient struct {
 	Client *sql.DB
 	Config DatabaseConfig
@@ -28,7 +29,7 @@ func (c MySQLClient) Connect(config DatabaseConfig) (client BaseClientInterface,
 func (c MySQLClient) generateDSN() string {
 	var (
 		//We initialise DSN with the username only
-		dsn = fmt.Sprintf("%s", c.Config.Username)
+		dsn = c.Config.Username
 	)
 
 	if c.Config.Password != "" {
@@ -38,7 +39,7 @@ func (c MySQLClient) generateDSN() string {
 	dsn += "@"
 
 	var host = c.generateHost()
-	dsn += fmt.Sprintf("%s", host)
+	dsn += host
 
 	if c.Config.Database == "" {
 		return dsn
@@ -193,7 +194,7 @@ func (c MySQLClient) executeQuery(queryStr string, bindings []interface{}) (resu
 	return result, nil
 }
 
-//prepareCreateSQLQuery method prepares the create query statement
+// prepareCreateSQLQuery method prepares the create query statement
 func (c MySQLClient) prepareCreateSQLQuery(q QueryInterface) string {
 	ifNotExists := ""
 	if q.GetIfNotExists() {
@@ -211,7 +212,7 @@ func (c MySQLClient) prepareCreateSQLQuery(q QueryInterface) string {
 	}
 
 	if len(q.GetDestination().GetColumns()) > 0 {
-		queryStr += fmt.Sprintf("%s", generateColumnsWithTypesSQLStr(q.GetDestination().GetColumns()))
+		queryStr += generateColumnsWithTypesSQLStr(q.GetDestination().GetColumns())
 	}
 
 	if q.GetDestination().GetPrimaryKey() != *(new(dto.ModelField)) {
@@ -226,7 +227,7 @@ func (c MySQLClient) prepareCreateSQLQuery(q QueryInterface) string {
 		queryStr += fmt.Sprintf(",\n%s", generateIndexesSQLStr(q.GetIndexesToAdd()))
 	}
 
-	queryStr += fmt.Sprintf(")")
+	queryStr += ")"
 
 	if c.Config.GetEngine() != "" {
 		queryStr += fmt.Sprintf(" ENGINE=%s", c.Config.GetEngine())
@@ -240,7 +241,7 @@ func (c MySQLClient) prepareCreateSQLQuery(q QueryInterface) string {
 		queryStr += fmt.Sprintf(" COLLATE=%s", c.Config.GetCollate())
 	}
 
-	queryStr += fmt.Sprintf(";")
+	queryStr += ";"
 
 	return queryStr
 }
@@ -272,7 +273,7 @@ func generateColumnSQLStr(column dto.ModelField) string {
 	}
 
 	if column.IsUnsigned {
-		resultStr += fmt.Sprintf(" unsigned")
+		resultStr += " unsigned"
 	}
 
 	if column.Default != nil {
@@ -280,16 +281,12 @@ func generateColumnSQLStr(column dto.ModelField) string {
 		switch v := column.Default.(type) {
 		case int:
 			resultStr += fmt.Sprintf(" %d", v)
-			break
 		case int64:
 			resultStr += fmt.Sprintf(" %d", v)
-			break
 		case string:
 			resultStr += fmt.Sprintf(` "%s"`, v)
-			break
 		case bool:
 			resultStr += fmt.Sprintf(" %t", v)
-			break
 		}
 	}
 
@@ -345,7 +342,7 @@ func generateIndexSQLStr(column dto.Index) string {
 	return resultStr
 }
 
-//prepareAlterSQLStr method prepares the alter query statement
+// prepareAlterSQLStr method prepares the alter query statement
 func prepareAlterSQLStr(q QueryInterface) string {
 	var queryStr = fmt.Sprintf("ALTER TABLE %s", q.GetDestination().GetTableName())
 

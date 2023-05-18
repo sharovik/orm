@@ -1,12 +1,12 @@
 package query
 
 const (
-	OrderDirectionAsc = "ASC"
+	OrderDirectionAsc  = "ASC"
 	OrderDirectionDesc = "DESC"
 )
 
-//OrderByColumn the column type for order by clause
+// OrderByColumn the column type for order by clause
 type OrderByColumn struct {
 	Direction string
-	Column string
+	Column    string
 }
