@@ -170,5 +170,6 @@ Please see the [examples.go](examples.go) file for more queries examples. And al
 - [table renaming](documentation/rename-table.md)
 - [CREATE TABLE statement](documentation/create-tables.md)
 - [Insert queries](documentation/insert.md)
+- [Transactions](documentation/transactions.md)
 - [Models](documentation/model.md)
 - [SQLite warnings](documentation/sqlite-warnings.md)
