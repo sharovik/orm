@@ -665,3 +665,9 @@ func TestMySQLClient_DeleteToSql(t *testing.T) {
 		assert.Equal(t, testCase.Expected, testCase.Original)
 	}
 }
+
+func TestMySQLClient_Transactions(t *testing.T) {
+	assert.Equal(t, "START TRANSACTION;", MySQLClient{}.ToSql(new(Query).BeginTransaction()))
+	assert.Equal(t, "COMMIT;", MySQLClient{}.ToSql(new(Query).CommitTransaction()))
+	assert.Equal(t, "ROLLBACK;", MySQLClient{}.ToSql(new(Query).RollbackTransaction()))
+}

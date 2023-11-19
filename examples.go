@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/sharovik/orm/clients"
@@ -16,6 +17,13 @@ type TestTableModel struct {
 	dto.BaseModel
 }
 
+var (
+	err     error
+	client  clients.BaseClientInterface
+	model   *TestTableModel
+	another *AnotherModel
+)
+
 func main() {
 	//We create database configuration for MySQL database
 	configuration := clients.DatabaseConfig{
@@ -26,13 +34,69 @@ func main() {
 		Type:     clients.DatabaseTypeMySQL,
 	}
 
-	client, err := clients.InitClient(configuration)
+	client, err = clients.InitClient(configuration)
 	if err != nil {
 		fmt.Println(fmt.Sprintf("Failed to connect to the database. Reason: %s", err))
 		return
 	}
 
-	another := new(AnotherModel)
+	if err = createTables(); err != nil {
+		panic(err)
+	}
+
+	fmt.Println("Tables created")
+
+	if err = triggerSelectQueries(); err != nil {
+		panic(err)
+	}
+
+	fmt.Println("Select queries executed")
+	if err = triggerInsert(); err != nil {
+		panic(err)
+	}
+
+	fmt.Println("Insert queries executed")
+
+	if err = triggerUpdate(); err != nil {
+		panic(err)
+	}
+
+	fmt.Println("Update queries executed")
+
+	if err = triggerTransactions(); err != nil {
+		panic(err)
+	}
+
+	fmt.Println("Transaction queries executed")
+
+	if err = triggerAlter(); err != nil {
+		panic(err)
+	}
+
+	fmt.Println("Alter queries executed")
+
+	if err = triggerDelete(); err != nil {
+		panic(err)
+	}
+
+	fmt.Println("Delete queries executed")
+
+	if err = triggerTableDrop(); err != nil {
+		panic(err)
+	}
+
+	fmt.Println("Drop queries executed")
+
+	if err = triggerTableRenaming(); err != nil {
+		panic(err)
+	}
+
+	fmt.Println("Tables renamed and dropped queries executed")
+	fmt.Println("All good")
+}
+
+func createTables() error {
+	another = new(AnotherModel)
 	another.SetTableName("another")
 	another.SetPrimaryKey(dto.ModelField{
 		Name:          "id",
@@ -47,12 +111,12 @@ func main() {
 
 	//Let's create a table for that model
 	q := new(clients.Query).Create(another).IfNotExists()
-	res, err := client.Execute(q)
+	_, err := client.Execute(q)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	model := new(TestTableModel)
+	model = new(TestTableModel)
 	model.SetTableName("test_table_name")
 	model.SetPrimaryKey(dto.ModelField{
 		Name:          "id",
@@ -121,28 +185,129 @@ func main() {
 		Key:    "test_field",
 		Unique: true,
 	}).IfNotExists()
-	res, err = client.Execute(q)
+	_, err = client.Execute(q)
+	return err
+}
+
+func triggerTableRenaming() error {
+	//We rename the another table
+	q := new(clients.Query).Rename(another.GetTableName(), "new_another_table")
+	_, err := client.Execute(q)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		return err
 	}
 
+	q = new(clients.Query).Select([]interface{}{}).From(&dto.BaseModel{
+		TableName: "new_another_table",
+	})
+	_, err = client.Execute(q)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	//We drop the table
+	another.SetTableName("new_another_table")
+	q = new(clients.Query).Drop(another)
+	_, err = client.Execute(q)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	return nil
+}
+
+func triggerTableDrop() error {
+	//We drop the table
+	q := new(clients.Query).Drop(model)
+	_, err := client.Execute(q)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	return nil
+}
+
+func triggerDelete() error {
+	//We delete item from the table
+	q := new(clients.Query).Delete().
+		From(model).
+		Where(query.Where{
+			First:    "id",
+			Operator: "=",
+			Second:   "1",
+		})
+	_, err := client.Execute(q)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	return nil
+}
+
+func triggerAlter() error {
+	//We alter table
+	q := new(clients.Query).Alter(model).
+		AddColumn(dto.ModelField{
+			Name:          "new_column",
+			Type:          dto.VarcharColumnType,
+			Value:         nil,
+			Default:       "",
+			Length:        244,
+			IsNullable:    true,
+			IsPrimaryKey:  false,
+			IsUnsigned:    false,
+			AutoIncrement: false,
+		}).DropColumn(dto.ModelField{
+		Name: "test_field",
+	}).DropForeignKey(dto.ForeignKey{
+		Name: "another_key",
+	}).DropIndex(dto.Index{
+		Name: "some_test_unique_index",
+	})
+	_, err := client.Execute(q)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	//We add new indexes
+	q = new(clients.Query).Alter(model).
+		AddIndex(dto.Index{
+			Name:   "my_brand_new_index",
+			Target: model.GetTableName(),
+			Key:    "new_column",
+			Unique: false,
+		})
+	_, err = client.Execute(q)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	return nil
+}
+
+func triggerSelectQueries() error {
 	//We select specific columns from the table
 	var columns = []interface{}{"id", "another_id"}
-	q = new(clients.Query).Select(columns).From(model)
-	res, err = client.Execute(q)
-	fmt.Println(err)
-	fmt.Println(res)
+	q := new(clients.Query).Select(columns).From(model)
+	_, err := client.Execute(q)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		return err
 	}
 
 	//We select specific columns from the table
 	q = new(clients.Query).Select(columns).From(model.TableName)
-	res, err = client.Execute(q)
-	fmt.Println(err)
-	fmt.Println(res)
+	_, err = client.Execute(q)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		return err
 	}
 
 	//We do select with join to other table
@@ -160,20 +325,22 @@ func main() {
 			Operator: "is",
 			Second:   "NULL",
 		})
-	res, err = client.Execute(q)
-	fmt.Println(err)
-	fmt.Println(res)
+	_, err = client.Execute(q)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		return err
 	}
 
+	return nil
+}
+
+func triggerInsert() error {
 	//We insert new item into our table
-	q = new(clients.Query).Insert(model)
-	res, err = client.Execute(q)
-	fmt.Println(err)
-	fmt.Println(res)
+	q := new(clients.Query).Insert(model)
+	_, err := client.Execute(q)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		return err
 	}
 
 	model.AddModelField(dto.ModelField{
@@ -189,20 +356,18 @@ func main() {
 
 	//We insert new item into our table
 	q = new(clients.Query).Insert(model)
-	res, err = client.Execute(q)
-	fmt.Println(err)
-	fmt.Println(res)
+	_, err = client.Execute(q)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		return err
 	}
 
 	//We select all model columns from our table
 	q = new(clients.Query).Select(model.GetColumns()).From(model)
-	res, err = client.Execute(q)
-	fmt.Println(err)
-	fmt.Println(res)
+	_, err = client.Execute(q)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		return err
 	}
 
 	//We do select from the table where id = 1 OR id = 2
@@ -219,11 +384,10 @@ func main() {
 			Second:   "2",
 			Type:     query.WhereOrType, //For OR condition, you can use the Type attribute of Where object
 		})
-	res, err = client.Execute(q)
-	fmt.Println(err)
-	fmt.Println(res)
+	_, err = client.Execute(q)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		return err
 	}
 
 	//We do select with the more complex WHERE clause
@@ -251,17 +415,49 @@ func main() {
 			Second:   "3",
 			Type:     query.WhereOrType, //For OR condition, you can use the Type attribute of Where object
 		})
-	res, err = client.Execute(q)
-	fmt.Println(err)
-	fmt.Println(res)
+	_, err = client.Execute(q)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		return err
+	}
+
+	return nil
+}
+
+func triggerUpdate() error {
+	//We update the table
+	model.AddModelField(dto.ModelField{
+		Name:  "test_field2",
+		Value: "test test test",
+	})
+	q := new(clients.Query).Update(model).Where(query.Where{
+		First:    model.GetPrimaryKey().Name,
+		Operator: "=",
+		Second: query.Bind{
+			Field: model.GetPrimaryKey().Name,
+			Value: model.GetPrimaryKey().Value,
+		},
+	})
+	_, err := client.Execute(q)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	return nil
+}
+
+func triggerTransactions() error {
+	q := new(clients.Query).BeginTransaction()
+	_, err := client.Execute(q)
+	if err != nil {
+		return err
 	}
 
 	//We update the table
 	model.AddModelField(dto.ModelField{
 		Name:  "test_field2",
-		Value: "test test test",
+		Value: "another test",
 	})
 	q = new(clients.Query).Update(model).Where(query.Where{
 		First:    model.GetPrimaryKey().Name,
@@ -271,104 +467,66 @@ func main() {
 			Value: model.GetPrimaryKey().Value,
 		},
 	})
-	res, err = client.Execute(q)
-	fmt.Println(err)
-	fmt.Println(res)
+	_, err = client.Execute(q)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	//We alter table
-	q = new(clients.Query).Alter(model).
-		AddColumn(dto.ModelField{
-			Name:          "new_column",
-			Type:          dto.VarcharColumnType,
-			Value:         nil,
-			Default:       "",
-			Length:        244,
-			IsNullable:    true,
-			IsPrimaryKey:  false,
-			IsUnsigned:    false,
-			AutoIncrement: false,
-		}).DropColumn(dto.ModelField{
-		Name: "test_field",
-	}).DropForeignKey(dto.ForeignKey{
-		Name: "another_key",
-	}).DropIndex(dto.Index{
-		Name: "some_test_unique_index",
+	q = new(clients.Query).CommitTransaction()
+	_, err = client.Execute(q)
+	if err != nil {
+		return err
+	}
+
+	//Now we need to trigger rollback scenario
+	q = new(clients.Query).BeginTransaction()
+	_, err = client.Execute(q)
+	if err != nil {
+		return err
+	}
+
+	//We update the table
+	model.AddModelField(dto.ModelField{
+		Name:  "test_field2",
+		Value: "__SHOULD_NOT_BE_UPDATED__",
 	})
-	res, err = client.Execute(q)
-	fmt.Println(err)
-	fmt.Println(res)
-	if err != nil {
-		panic(err)
-	}
-
-	//We add new indexes
-	q = new(clients.Query).Alter(model).
-		AddIndex(dto.Index{
-			Name:   "my_brand_new_index",
-			Target: model.GetTableName(),
-			Key:    "new_column",
-			Unique: false,
-		})
-	res, err = client.Execute(q)
-	fmt.Println(err)
-	fmt.Println(res)
-	if err != nil {
-		panic(err)
-	}
-
-	//We delete item from the table
-	q = new(clients.Query).Delete().
-		From(model).
-		Where(query.Where{
-			First:    "id",
-			Operator: "=",
-			Second:   "1",
-		})
-	res, err = client.Execute(q)
-	fmt.Println(err)
-	fmt.Println(res)
-	if err != nil {
-		panic(err)
-	}
-
-	//We drop the table
-	q = new(clients.Query).Drop(model)
-	res, err = client.Execute(q)
-	fmt.Println(err)
-	fmt.Println(res)
-	if err != nil {
-		panic(err)
-	}
-
-	//We rename the another table
-	q = new(clients.Query).Rename(another.GetTableName(), "new_another_table")
-	res, err = client.Execute(q)
-	fmt.Println(err)
-	fmt.Println(res)
-	if err != nil {
-		panic(err)
-	}
-
-	q = new(clients.Query).Select([]interface{}{}).From(&dto.BaseModel{
-		TableName: "new_another_table",
+	q = new(clients.Query).Update(model).Where(query.Where{
+		First:    model.GetPrimaryKey().Name,
+		Operator: "=",
+		Second: query.Bind{
+			Field: model.GetPrimaryKey().Name,
+			Value: model.GetPrimaryKey().Value,
+		},
 	})
-	res, err = client.Execute(q)
-	fmt.Println(err)
-	fmt.Println(res)
+	_, err = client.Execute(q)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	//We drop the table
-	another.SetTableName("new_another_table")
-	q = new(clients.Query).Drop(another)
-	res, err = client.Execute(q)
-	fmt.Println(err)
-	fmt.Println(res)
+	//Now we need to trigger rollback scenario
+	q = new(clients.Query).RollbackTransaction()
+	_, err = client.Execute(q)
 	if err != nil {
-		panic(err)
+		return err
 	}
+
+	//Now we need to trigger rollback scenario
+	q = new(clients.Query).Select(model.GetColumns()).From(model).Where(query.Where{
+		First:    "test_field2",
+		Operator: "=",
+		Second: query.Bind{
+			Field: "test_field2",
+			Value: "__SHOULD_NOT_BE_UPDATED__",
+		},
+	})
+	res, err := client.Execute(q)
+	if err != nil {
+		return err
+	}
+
+	if len(res.Items()) > 0 {
+		return errors.New("there should be no items with that value")
+	}
+
+	return nil
 }
