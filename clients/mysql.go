@@ -71,26 +71,7 @@ func (c MySQLClient) GetClient() *sql.DB {
 }
 
 func (c MySQLClient) ToSql(q QueryInterface) string {
-	switch q.GetQueryType() {
-	case SelectType:
-		return prepareSelectQuery(q)
-	case InsertType:
-		return prepareInsertQuery(q)
-	case DeleteType:
-		return prepareDeleteQuery(q)
-	case AlterType:
-		return prepareAlterSQLStr(q)
-	case RenameType:
-		return prepareRenameTableQuery(q)
-	case UpdateType:
-		return prepareUpdateQuery(q)
-	case DropType:
-		return prepareDropQuery(q)
-	case CreateType:
-		return c.prepareCreateSQLQuery(q)
-	}
-
-	return ""
+	return toSql(c, q)
 }
 
 func (c MySQLClient) Execute(q QueryInterface) (result dto.BaseResult, err error) {
@@ -194,8 +175,20 @@ func (c MySQLClient) executeQuery(queryStr string, bindings []interface{}) (resu
 	return result, nil
 }
 
+func (c MySQLClient) prepareTransactionBegin() string {
+	return "START TRANSACTION;"
+}
+
+func (c MySQLClient) prepareTransactionCommit() string {
+	return "COMMIT;"
+}
+
+func (c MySQLClient) prepareTransactionRollback() string {
+	return "ROLLBACK;"
+}
+
 // prepareCreateSQLQuery method prepares the create query statement
-func (c MySQLClient) prepareCreateSQLQuery(q QueryInterface) string {
+func (c MySQLClient) prepareCreateQuery(q QueryInterface) string {
 	ifNotExists := ""
 	if q.GetIfNotExists() {
 		ifNotExists = "IF NOT EXISTS "
@@ -343,7 +336,7 @@ func generateIndexSQLStr(column dto.Index) string {
 }
 
 // prepareAlterSQLStr method prepares the alter query statement
-func prepareAlterSQLStr(q QueryInterface) string {
+func (c MySQLClient) prepareAlterQuery(q QueryInterface) string {
 	var queryStr = fmt.Sprintf("ALTER TABLE %s", q.GetDestination().GetTableName())
 
 	var result []string

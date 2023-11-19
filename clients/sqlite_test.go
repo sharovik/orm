@@ -984,6 +984,12 @@ func TestFromInterfaceUsage(t *testing.T) {
 	assert.Equal(t, "SELECT id, name FROM test_table", actual)
 }
 
+func TestSQLiteClient_Transactions(t *testing.T) {
+	assert.Equal(t, "BEGIN TRANSACTION;", SQLiteClient{}.ToSql(new(Query).BeginTransaction()))
+	assert.Equal(t, "COMMIT;", SQLiteClient{}.ToSql(new(Query).CommitTransaction()))
+	assert.Equal(t, "ROLLBACK;", SQLiteClient{}.ToSql(new(Query).RollbackTransaction()))
+}
+
 func initDatabase() {
 	_, err := os.Create(testSQLiteDatabasePath)
 	if err != nil {

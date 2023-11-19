@@ -9,14 +9,17 @@ import (
 )
 
 const (
-	CreateType = "CREATE"
-	AlterType  = "ALTER"
-	RenameType = "RENAME"
-	DropType   = "DROP"
-	SelectType = "SELECT"
-	InsertType = "INSERT"
-	UpdateType = "UPDATE"
-	DeleteType = "DELETE"
+	CreateType          = "CREATE"
+	AlterType           = "ALTER"
+	RenameType          = "RENAME"
+	DropType            = "DROP"
+	SelectType          = "SELECT"
+	InsertType          = "INSERT"
+	UpdateType          = "UPDATE"
+	DeleteType          = "DELETE"
+	TransactionBegin    = "TRANSACTION_BEGIN"
+	TransactionCommit   = "TRANSACTION_COMMIT"
+	TransactionRollback = "TRANSACTION_ROLLBACK"
 
 	DatabaseTypeMySQL   = "mysql"
 	DatabaseTypeSqlite  = "sqlite"
@@ -64,6 +67,12 @@ type BaseClientInterface interface {
 	GetClient() *sql.DB
 	ToSql(query QueryInterface) string
 	Execute(query QueryInterface) (result dto.BaseResult, err error)
+
+	prepareCreateQuery(q QueryInterface) string
+	prepareAlterQuery(q QueryInterface) string
+	prepareTransactionBegin() string
+	prepareTransactionCommit() string
+	prepareTransactionRollback() string
 }
 
 // QueryInterface the interface for the query builder of the client
@@ -163,6 +172,15 @@ type QueryInterface interface {
 
 	//GetBindings method returns the binding collected during the query building
 	GetBindings() []query.Bind
+
+	//BeginTransaction begins the transaction
+	BeginTransaction() QueryInterface
+
+	//CommitTransaction commits the transaction
+	CommitTransaction() QueryInterface
+
+	//RollbackTransaction rollbacks the transaction
+	RollbackTransaction() QueryInterface
 }
 
 // Query the query object of the SQLite client
@@ -188,6 +206,21 @@ type Query struct {
 
 func (q *Query) GetQueryType() string {
 	return q.queryType
+}
+
+func (q *Query) RollbackTransaction() QueryInterface {
+	q.queryType = TransactionRollback
+	return q
+}
+
+func (q *Query) CommitTransaction() QueryInterface {
+	q.queryType = TransactionCommit
+	return q
+}
+
+func (q *Query) BeginTransaction() QueryInterface {
+	q.queryType = TransactionBegin
+	return q
 }
 
 func (q *Query) GetNewTableName() string {
