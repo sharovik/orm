@@ -6,20 +6,21 @@ Simple query builder, for SQL-like databases.
 - SQLite
 
 ## How to use?
-### Import the ORM package
+
+### Install the package
+```go
+go get -u github.com/sharovik/orm
+```
+
+### Init the client
 ```go
 import (
     "github.com/sharovik/orm/clients"
-    cdto "github.com/sharovik/orm/dto" //If you don't have the `dto` package name in your project, then you can remove custom `cdto` alias
 )
-
-```
-### Init the client
-```go
 
 //For sqlite
 databaseClient, err := clients.InitClient(clients.DatabaseConfig{
-  Host:     "mysqlite-database.sqlite",
+  Host:     "database.sqlite",
 })
 
 //For mysql
@@ -35,7 +36,19 @@ databaseClient, err := clients.InitClient(clients.DatabaseConfig{
 ### Start using the query builder
 There are several ways, how you can communicate with database using this query builder
 
-#### Using model
+**Basic example**
+```go
+//Get results sqlite
+//We select specific columns from the table
+var columns = []interface{}{"col1", "col2"}
+q := new(clients.Query).Select(columns).From("test_table_name")
+_, err := databaseClient.Execute(q)
+if err != nil {
+    return err
+}
+```
+
+**Using model**
 ```go
 package main
 
@@ -49,7 +62,7 @@ func main() {
 	model := new(TestTableModel)
 	model.SetTableName("test_table_name")
 	model.SetPrimaryKey(dto.ModelField{
-		Name:          "id",
+		Name:          "col1",
 		Type:          "integer",
 		Value:         nil,
 		Default:       nil,
@@ -59,7 +72,7 @@ func main() {
 		AutoIncrement: true,
 	})
 	model.AddModelField(dto.ModelField{
-		Name:          "another_id",
+		Name:          "col2",
 		Type:          dto.IntegerColumnType,
 		Value:         nil,
 		Default:       nil,
@@ -79,11 +92,6 @@ func main() {
 This code will execute the next SQL query
 ```sql
 SELECT col1, col2 FROM test_table_name
-```
-#### Without model
-If you don't want to use model for your query, you can pass the table name string as argument for `From` method.
-```go
-results, err := databaseClient.Execute(new(Query).Select([]interface{}{"col1", "col2"}).From("test_table_name"))
 ```
 
 ### Complex queries
@@ -163,6 +171,9 @@ This will generate the next prepared query
 ```sql
 SELECT id, name FROM test_table_name WHERE name = ?
 ```
+
+### Work with the results
+As the output of the `Execute` method you will receive the object type of `dto.BaseResult`. This object can contain the list of items for your query, the database error OR the last inserted ID.
 
 Please see the [examples.go](examples.go) file for more queries examples. And also, please check the [documentation files here](documentation).
 
